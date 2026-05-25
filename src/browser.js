@@ -23,8 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const openFolderBtn = document.getElementById("open-folder-btn");
     const previewFrame = document.getElementById("preview-frame");
     const openExternalBtn = document.getElementById("open-external-btn");
-    const viewCodeBtn = document.getElementById("view-code-btn");
-    const viewPreviewBtn = document.getElementById("view-preview-btn");
+    const togglePreviewBtn = document.getElementById("toggle-preview-btn");
     const ideViewToggle = document.getElementById("ide-view-toggle");
     const monacoEditorDiv = document.getElementById("monaco-editor");
     const newFileBtn = document.getElementById("new-file-btn");
@@ -497,7 +496,7 @@ ${suffix}`;
                             .dod2v { background-color: #303134 !important; }
                             #cnt { background-color: transparent !important; }
                             .gb_Ia, .gb_Ja { color: #e8eaed !important; }
-                        `).catch(() => {});
+                        `).catch(() => { });
                     }
                 }
             } catch (err) {
@@ -513,10 +512,10 @@ ${suffix}`;
                 suggestionsBox.classList.remove("visible");
             } else if (event.channel === "open-portfolio-project") {
                 const projectPath = event.args[0];
-                
+
                 // Open IDE Tab
                 createIdeTab();
-                
+
                 // Set the IDE workspace
                 currentRootPath = projectPath;
                 projectRoot.textContent = currentRootPath;
@@ -525,16 +524,16 @@ ${suffix}`;
             } else if (event.channel === "open-portfolio-file") {
                 const filePath = event.args[0];
                 const parentPath = filePath.substring(0, Math.max(filePath.lastIndexOf('\\'), filePath.lastIndexOf('/')));
-                
+
                 // Open IDE Tab
                 createIdeTab();
-                
+
                 // Set the IDE workspace
                 currentRootPath = parentPath;
                 projectRoot.textContent = currentRootPath;
                 fileTree.replaceChildren();
                 await renderDirectory(currentRootPath, fileTree);
-                
+
                 // Open the specific file in Monaco
                 await loadFile(filePath);
             }
@@ -820,9 +819,14 @@ ${suffix}`;
 
         if (language === 'html') {
             ideViewToggle.classList.remove('hidden');
+            if (togglePreviewBtn && togglePreviewBtn.textContent === "Preview: OFF") {
+                togglePreviewBtn.click();
+            }
         } else {
             ideViewToggle.classList.add('hidden');
-            switchToCodeView();
+            if (togglePreviewBtn && togglePreviewBtn.textContent === "Preview: ON") {
+                togglePreviewBtn.click();
+            }
         }
 
         if (language === "css") {
@@ -905,7 +909,7 @@ ${suffix}`;
     }
 
     function deferPreviewScripts(html) {
-        return html.replace(/<script\b([^>]*)\bsrc=(["'][^"']+["'])([^>]*)>/gi, (match, beforeSrc, src, afterSrc) => {
+        return html.replace(/<script\b([^>]*)\bsrc=(["'][^>]*["'])([^>]*)>/gi, (match, beforeSrc, src, afterSrc) => {
             const attrs = `${beforeSrc} src=${src}${afterSrc}`;
             if (/\b(defer|async)\b/i.test(attrs) || /\btype\s*=\s*["']module["']/i.test(attrs)) return match;
             return `<script${beforeSrc} src=${src}${afterSrc} defer>`;
@@ -1057,25 +1061,25 @@ ${suffix}`;
         navigateBrowserHistory(direction);
     });
 
-    function switchToCodeView() {
-        viewCodeBtn.classList.add("active");
-        viewPreviewBtn.classList.remove("active");
-        monacoEditorDiv.style.display = "block";
-        previewContainer.style.display = "none";
+    togglePreviewBtn.addEventListener("click", () => {
+        const previewResizer = document.getElementById("preview-resizer");
+        if (togglePreviewBtn.textContent === "Preview: ON") {
+            togglePreviewBtn.textContent = "Preview: OFF";
+            togglePreviewBtn.classList.remove("active");
+            previewContainer.style.display = "none";
+            if (previewResizer) previewResizer.style.display = "none";
+        } else {
+            togglePreviewBtn.textContent = "Preview: ON";
+            togglePreviewBtn.classList.add("active");
+            previewContainer.style.display = "flex";
+            if (previewResizer) previewResizer.style.display = "block";
+        }
         if (editor) {
             setTimeout(() => editor.layout(), 10);
         }
-    }
+    });
 
-    function switchToPreviewView() {
-        viewCodeBtn.classList.remove("active");
-        viewPreviewBtn.classList.add("active");
-        monacoEditorDiv.style.display = "none";
-        previewContainer.style.display = "flex";
-    }
 
-    viewCodeBtn.addEventListener("click", switchToCodeView);
-    viewPreviewBtn.addEventListener("click", switchToPreviewView);
 
     portfolioBtn.addEventListener("click", () => createTab("portfolio.html"));
     ideToggleBtn.addEventListener("click", createIdeTab);
@@ -1171,7 +1175,7 @@ ${suffix}`;
 
         const newPath = nodePath.join(nodePath.dirname(currentRenamePath), newName);
         const success = await ipcRenderer.invoke("rename-file", currentRenamePath, newPath);
-        
+
         if (success) {
             if (currentFilePath === currentRenamePath) {
                 currentFilePath = newPath;
@@ -1274,7 +1278,7 @@ ${suffix}`;
             fileTreeContainer.classList.remove("hidden-tab");
             ideSidebarConsole.classList.add("hidden-tab");
         });
-        
+
         activityConsoleBtn.addEventListener("click", () => {
             activityConsoleBtn.classList.add("active");
             activityFilesBtn.classList.remove("active");
@@ -1316,32 +1320,32 @@ ${suffix}`;
         previewFrame.addEventListener("console-message", (e) => {
             if (!ideSidebarConsole) return;
             let { level, message, line, sourceId } = e;
-            
+
             // Electron Security Warnings or other internal messages can be filtered here
             if (typeof message === 'string') {
                 message = message.replace(/%c/g, ''); // strip CSS formatting tokens
             }
-            
+
             const msgEl = document.createElement("div");
             msgEl.className = "console-msg";
-            
+
             let levelClass = "console-log";
             if (level === 2) levelClass = "console-warn";
             if (level === 3) levelClass = "console-error";
-            
+
             msgEl.classList.add(levelClass);
-            
+
             const textEl = document.createElement("div");
             textEl.textContent = message;
-            
+
             const sourceEl = document.createElement("span");
             sourceEl.className = "console-source";
             const filename = sourceId ? sourceId.split('/').pop() : "unknown";
             sourceEl.textContent = `Line ${line} - ${filename}`;
-            
+
             msgEl.appendChild(textEl);
             msgEl.appendChild(sourceEl);
-            
+
             ideSidebarConsole.appendChild(msgEl);
             ideSidebarConsole.scrollTop = ideSidebarConsole.scrollHeight;
         });

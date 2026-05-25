@@ -65,8 +65,7 @@
                 <div id="editor-header">
                     <span id="active-file-label">untitled.html</span>
                     <div id="ide-view-toggle" class="view-toggle hidden">
-                        <button id="view-code-btn" class="active">Code</button>
-                        <button id="view-preview-btn">Preview</button>
+                        <button id="toggle-preview-btn" class="active">Preview: ON</button>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <button id="ai-suggest-btn" class="nav-btn"
@@ -75,11 +74,12 @@
                         <span id="save-status">Saved</span>
                     </div>
                 </div>
-                <div id="ide-split" class="single-view">
+                <div id="ide-split">
                     <div id="monaco-editor"></div>
-                    <div id="preview-container" style="display: none;">
+                    <div id="preview-resizer" class="ide-resizer" title="Adjust preview width"></div>
+                    <div id="preview-container">
                         <div id="preview-header">
-                            <span>Live Preview</span>
+                            <span id="preview-title">Live Preview</span>
                             <a href="#" id="open-external-btn" title="Open in Browser">↗</a>
                         </div>
                         <webview id="preview-frame" src="about:blank"></webview>
