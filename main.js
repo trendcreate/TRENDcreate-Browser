@@ -449,6 +449,20 @@ function createWindow() {
     menu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
   });
 
+  ipcMain.handle('show-unsaved-dialog', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showMessageBox(win, {
+      type: 'warning',
+      buttons: ['Close without saving', 'Cancel'],
+      defaultId: 1,
+      cancelId: 1,
+      title: 'Unsaved Changes',
+      message: 'There are unsaved changes in the IDE. Do you really want to close this tab?',
+      detail: 'Your unsaved changes will be lost.'
+    });
+    return result.response;
+  });
+
   ipcMain.on('show-file-context-menu', (event, targetPath, isDirectory) => {
     const template = [
       {

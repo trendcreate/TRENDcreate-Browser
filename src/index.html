@@ -21,21 +21,60 @@
     <div id="browser-ui">
         <div id="tabs-container">
             <div id="tabs"></div>
-            <button id="new-tab-btn" title="New Tab"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
-            <button id="portfolio-btn" title="Open Portfolio"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
-            <button id="ide-toggle-btn" title="Open IDE in New Tab"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button>
+            <button id="new-tab-btn" title="New Tab"><svg viewBox="0 0 24 24" width="16" height="16"
+                    stroke="currentColor" stroke-width="2" fill="none">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg></button>
+            <button id="portfolio-btn" title="Open Portfolio"><svg viewBox="0 0 24 24" width="16" height="16"
+                    stroke="currentColor" stroke-width="2" fill="none">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg></button>
+            <button id="ide-toggle-btn" title="Open IDE in New Tab"><svg viewBox="0 0 24 24" width="16" height="16"
+                    stroke="currentColor" stroke-width="2" fill="none">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg></button>
         </div>
         <div id="nav-bar">
-            <button id="back-btn" class="nav-btn" disabled title="Back"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-            <button id="forward-btn" class="nav-btn" disabled title="Forward"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-            <button id="reload-btn" class="nav-btn" title="Reload"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></button>
+            <button id="back-btn" class="nav-btn" disabled title="Back"><svg viewBox="0 0 24 24" width="16" height="16"
+                    stroke="currentColor" stroke-width="2" fill="none">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg></button>
+            <button id="forward-btn" class="nav-btn" disabled title="Forward"><svg viewBox="0 0 24 24" width="16"
+                    height="16" stroke="currentColor" stroke-width="2" fill="none">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg></button>
+            <button id="reload-btn" class="nav-btn" title="Reload"><svg viewBox="0 0 24 24" width="16" height="16"
+                    stroke="currentColor" stroke-width="2" fill="none">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg></button>
             <div id="url-bar-container">
                 <input type="text" id="url-bar" placeholder="Search or enter URL" autocomplete="off">
                 <div id="suggestions-box"></div>
             </div>
-            <button id="history-btn" class="nav-btn" title="History"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></button>
-            <button id="devtools-btn" class="nav-btn" title="Open DevTools"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></button>
-            <button id="settings-btn" class="nav-btn" title="Settings"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+            <button id="history-btn" class="nav-btn" title="History"><svg viewBox="0 0 24 24" width="16" height="16"
+                    stroke="currentColor" stroke-width="2" fill="none">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg></button>
+            <button id="devtools-btn" class="nav-btn" title="Open DevTools"><svg viewBox="0 0 24 24" width="16"
+                    height="16" stroke="currentColor" stroke-width="2" fill="none">
+                    <path
+                        d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+                    </path>
+                </svg></button>
+            <button id="settings-btn" class="nav-btn" title="Settings"><svg viewBox="0 0 24 24" width="16" height="16"
+                    stroke="currentColor" stroke-width="2" fill="none">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg></button>
         </div>
     </div>
 
@@ -43,15 +82,46 @@
         <section id="webviews-container"></section>
         <section id="ide-panel" class="ide-hidden" aria-label="IDE">
             <div id="ide-activity-bar">
-                <button id="activity-files-btn" class="activity-btn active" title="Explorer"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></button>
-                <button id="activity-console-btn" class="activity-btn" title="Console"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
+                <button id="activity-files-btn" class="activity-btn active" title="Explorer"><svg viewBox="0 0 24 24"
+                        width="20" height="20" stroke="currentColor" stroke-width="1.5" fill="none">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg></button>
+                <button id="activity-console-btn" class="activity-btn" title="Console"><svg viewBox="0 0 24 24"
+                        width="20" height="20" stroke="currentColor" stroke-width="1.5" fill="none">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                        </path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg></button>
             </div>
             <div id="ide-sidebar">
                 <div class="ide-toolbar">
-                    <button id="open-folder-btn" title="Open Folder"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></button>
-                    <button id="new-file-btn" title="New File"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg></button>
-                    <button id="save-file-btn" title="Save File"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></button>
-                    <button id="live-server-btn" title="Start Live Server"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path></svg></button>
+                    <button id="open-folder-btn" title="Open Folder"><svg viewBox="0 0 24 24" width="16" height="16"
+                            stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                            </path>
+                        </svg></button>
+                    <button id="new-file-btn" title="New File"><svg viewBox="0 0 24 24" width="16" height="16"
+                            stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg></button>
+                    <button id="save-file-btn" title="Save File"><svg viewBox="0 0 24 24" width="16" height="16"
+                            stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg></button>
+                    <button id="live-server-btn" title="Start Live Server"><svg viewBox="0 0 24 24" width="16"
+                            height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <path
+                                d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14">
+                            </path>
+                        </svg></button>
                 </div>
                 <div id="file-tree-container">
                     <div id="project-root">No folder selected</div>
@@ -65,7 +135,7 @@
                 <div id="editor-header">
                     <span id="active-file-label">untitled.html</span>
                     <div id="ide-view-toggle" class="view-toggle hidden">
-                        <button id="toggle-preview-btn" class="active">Preview: ON</button>
+                        <button id="toggle-preview-btn">Preview: OFF</button>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <button id="ai-suggest-btn" class="nav-btn"
@@ -75,14 +145,14 @@
                     </div>
                 </div>
                 <div id="ide-split">
-                    <div id="monaco-editor"></div>
-                    <div id="preview-resizer" class="ide-resizer" title="Adjust preview width"></div>
-                    <div id="preview-container">
+                    <div id="monaco-editor" style="flex: 1;"></div>
+                    <div id="preview-resizer" class="ide-resizer" title="Adjust preview width" style="display: none;"></div>
+                    <div id="preview-container" style="display: none;">
                         <div id="preview-header">
                             <span id="preview-title">Live Preview</span>
                             <a href="#" id="open-external-btn" title="Open in Browser">↗</a>
                         </div>
-                        <webview id="preview-frame" src="about:blank"></webview>
+                        <webview id="preview-frame" style="flex: 1; border: none; background: white;" webpreferences="contextIsolation=false" src="about:blank"></webview>
                     </div>
                 </div>
             </div>
@@ -98,10 +168,13 @@
     <div id="rename-modal" class="modal hidden">
         <div class="modal-content">
             <h3 style="margin-top: 0;">名前を変更</h3>
-            <input type="text" id="rename-input" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; color: #000;">
+            <input type="text" id="rename-input"
+                style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; color: #000;">
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
-                <button id="rename-cancel" style="padding: 6px 12px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #eee;">キャンセル</button>
-                <button id="rename-confirm" style="padding: 6px 12px; cursor: pointer; border: 1px solid #007acc; border-radius: 4px; background: #007acc; color: white;">変更</button>
+                <button id="rename-cancel"
+                    style="padding: 6px 12px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #eee;">キャンセル</button>
+                <button id="rename-confirm"
+                    style="padding: 6px 12px; cursor: pointer; border: 1px solid #007acc; border-radius: 4px; background: #007acc; color: white;">変更</button>
             </div>
         </div>
     </div>

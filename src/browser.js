@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewResizer = document.getElementById("preview-resizer");
     const openFolderBtn = document.getElementById("open-folder-btn");
     const previewFrame = document.getElementById("preview-frame");
+    const previewContainer = document.getElementById("preview-container");
     const openExternalBtn = document.getElementById("open-external-btn");
     const togglePreviewBtn = document.getElementById("toggle-preview-btn");
     const ideViewToggle = document.getElementById("ide-view-toggle");
@@ -829,6 +830,25 @@ ${suffix}`;
             }
         }
 
+        const imageExts = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'ico'];
+        const ext = currentFilePath ? currentFilePath.split('.').pop().toLowerCase() : '';
+        if (imageExts.includes(ext)) {
+            ideViewToggle.classList.remove('hidden');
+            if (togglePreviewBtn && togglePreviewBtn.textContent === "Preview: OFF") {
+                togglePreviewBtn.click();
+            }
+            try {
+                const { pathToFileURL } = window.nodeRequire("url");
+                const fileUrl = pathToFileURL(currentFilePath).href;
+                if (previewFrame.src !== fileUrl) {
+                    previewFrame.src = fileUrl;
+                }
+            } catch (e) {
+                console.error("Failed to load image preview", e);
+            }
+            return;
+        }
+
         if (language === "css") {
             html = `<!DOCTYPE html><html><head>${getPreviewBaseTag()}<style>${content}</style></head><body><main><h1>CSS Preview</h1><p>Edit styles to update this preview.</p><button>Button</button></main></body></html>`;
         } else if (language === "javascript" || language === "typescript") {
@@ -988,13 +1008,22 @@ ${suffix}`;
                     button.addEventListener("click", async () => {
                         if (!(await promptSaveUnsavedChanges())) return;
 
+                        const imageExts = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'ico'];
+                        const ext = item.name.split('.').pop().toLowerCase();
+                        
+                        document.querySelectorAll(".tree-item.active").forEach((node) => node.classList.remove("active"));
+                        button.classList.add("active");
+
+                        if (imageExts.includes(ext)) {
+                            setEditorValue(`<!-- Image: ${item.name} -->\n<!-- Binary files cannot be edited in Monaco. -->`, item.path);
+                            return;
+                        }
+
                         const content = await ipcRenderer.invoke("read-file", item.path);
                         if (content === null) {
                             updateSaveStatus("読み込み失敗");
                             return;
                         }
-                        document.querySelectorAll(".tree-item.active").forEach((node) => node.classList.remove("active"));
-                        button.classList.add("active");
                         setEditorValue(content, item.path);
                     });
                 }
@@ -1211,13 +1240,13 @@ ${suffix}`;
             updatePreview();
         } else {
             if (!currentRootPath) {
-                alert("Please open a folder first to start the Live Server.");
+                alert("Live Serverを起動するには、まずフォルダを開いてください。");
                 return;
             }
             const customPort = parseInt(localStorage.getItem('liveServerPort')) || 0;
             const port = await ipcRenderer.invoke("start-live-server", currentRootPath, customPort);
             if (port === -1) {
-                alert(`Port ${customPort} is already in use. Please change it in Settings.`);
+                alert(`ポート ${customPort} は既に使用されています。設定から変更してください。`);
             } else {
                 liveServerPort = port;
                 liveServerBtn.style.color = "#4caf50";

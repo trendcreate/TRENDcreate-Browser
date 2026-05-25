@@ -377,7 +377,7 @@ webview {
     padding: 20px;
     border-radius: 8px;
     width: 300px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     border: 1px solid #444;
 }
 
@@ -498,10 +498,29 @@ webview {
     display: flex;
     flex-direction: column;
 }
-.console-error { color: #ff8080; background: rgba(255, 0, 0, 0.1); border-top: 1px solid rgba(255, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 0, 0, 0.2); }
-.console-warn { color: #f2c97d; background: rgba(255, 200, 0, 0.1); border-top: 1px solid rgba(255, 200, 0, 0.2); border-bottom: 1px solid rgba(255, 200, 0, 0.2); }
-.console-info { color: #8ab4f8; }
-.console-log { color: #cccccc; }
+
+.console-error {
+    color: #ff8080;
+    background: rgba(255, 0, 0, 0.1);
+    border-top: 1px solid rgba(255, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.console-warn {
+    color: #f2c97d;
+    background: rgba(255, 200, 0, 0.1);
+    border-top: 1px solid rgba(255, 200, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 200, 0, 0.2);
+}
+
+.console-info {
+    color: #8ab4f8;
+}
+
+.console-log {
+    color: #cccccc;
+}
+
 .console-source {
     color: #888;
     font-size: 10px;
@@ -570,7 +589,31 @@ webview {
 
 
 
-#ide-split { display: flex; flex: 1; min-height: 0; width: 100%; }
-#monaco-editor { flex: 1; width: 100%; height: 100%; }
-#preview-container { flex: 1; width: 100%; height: 100%; flex-direction: column; }
+#ide-split {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+}
 
+#monaco-editor {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#preview-container {
+    display: none;
+    flex: 0 0 var(--preview-width, 50%);
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    position: relative;
+}
+
+#preview-frame {
+    position: relative !important;
+    inset: auto !important;
+    flex: 1;
+}
