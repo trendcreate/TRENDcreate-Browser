@@ -1,0 +1,48 @@
+{
+  "name": "trendcreate_browser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:win:portable": "electron-builder --win portable",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^42.2.0",
+    "electron-builder": "^26.8.1"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.55.1"
+  },
+  "build": {
+    "appId": "com.trendcreate.browser",
+    "productName": "TRENDcreate Browser",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "manifest.json",
+      "package.json",
+      "src/**/*",
+      "node_modules/monaco-editor/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

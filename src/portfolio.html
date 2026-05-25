@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Portfolio - TRENDcreate Browser</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 40px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-y: auto;
+        }
+        
+        .portfolio-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .portfolio-page-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .modern-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .modern-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="portfolio-page-header">
+        <h1>Local Projects Portfolio</h1>
+        <button id="open-workspace-btn" class="modern-btn">Change Workspace</button>
+    </div>
+    
+    <div class="portfolio-grid" id="portfolio-grid">
+        <!-- Cards will be injected here -->
+    </div>
+    
+    <script src="portfolio.js"></script>
+</body>
+</html>

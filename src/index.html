@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TRENDcreate Browser</title>
+    <link rel="stylesheet" href="browser.css">
+</head>
+
+<body>
+    <div id="browser-ui">
+        <div id="tabs-container">
+            <div id="tabs"></div>
+            <button id="new-tab-btn" title="New Tab">+</button>
+            <button id="portfolio-btn" title="Open Portfolio">📖</button>
+            <button id="ide-toggle-btn" title="Open IDE in New Tab">✎</button>
+        </div>
+        <div id="nav-bar">
+            <button id="back-btn" class="nav-btn" disabled title="Back">‹</button>
+            <button id="forward-btn" class="nav-btn" disabled title="Forward">›</button>
+            <button id="reload-btn" class="nav-btn" title="Reload">↻</button>
+            <div id="url-bar-container">
+                <input type="text" id="url-bar" placeholder="Search or enter URL" autocomplete="off">
+                <div id="suggestions-box"></div>
+            </div>
+            <button id="history-btn" class="nav-btn" title="History">H</button>
+            <button id="devtools-btn" class="nav-btn" title="Open DevTools">🛠</button>
+            <button id="settings-btn" class="nav-btn" title="Settings">⚙</button>
+        </div>
+    </div>
+
+    <main id="workspace">
+        <section id="webviews-container"></section>
+        <section id="ide-panel" class="ide-hidden" aria-label="IDE">
+            <div id="ide-activity-bar">
+                <button id="activity-files-btn" class="activity-btn active" title="Explorer">📁</button>
+                <button id="activity-console-btn" class="activity-btn" title="Console">⚠️</button>
+            </div>
+            <div id="ide-sidebar">
+                <div class="ide-toolbar">
+                    <button id="open-folder-btn">📁</button>
+                    <button id="new-file-btn">📄</button>
+                    <button id="save-file-btn">💾</button>
+                    <button id="live-server-btn" title="Start Live Server">📡</button>
+                </div>
+                <div id="file-tree-container">
+                    <div id="project-root">No folder selected</div>
+                    <div id="file-tree"></div>
+                </div>
+                <div id="ide-sidebar-console" class="hidden-tab"></div>
+                <div id="license-note">Editor: Monaco Editor, MIT License (c) Microsoft Corporation.</div>
+            </div>
+            <div id="sidebar-resizer" class="ide-resizer" title="Adjust sidebar width"></div>
+            <div id="ide-main">
+                <div id="editor-header">
+                    <span id="active-file-label">untitled.html</span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button id="ai-suggest-btn" class="nav-btn"
+                            style="height: 24px; font-size: 11px; padding: 0 8px; border-radius: 4px; color: #8ab4f8; border: 1px solid rgba(138,180,248,0.5);"
+                            title="Trigger AI Code Suggestion (Ctrl+Enter)">☆</button>
+                        <span id="save-status">Saved</span>
+                    </div>
+                </div>
+                <div id="ide-split">
+                    <div id="monaco-editor"></div>
+                    <div id="preview-resizer" class="ide-resizer" title="Adjust preview width"></div>
+                    <div id="preview-container">
+                        <div id="preview-header">
+                            <span>Live Preview</span>
+                            <a href="#" id="open-external-btn" title="Open in Browser">↗</a>
+                        </div>
+                        <webview id="preview-frame" src="about:blank"></webview>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        window.nodeRequire = require;
+    </script>
+    <script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
+
+    <!-- Rename Modal -->
+    <div id="rename-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 style="margin-top: 0;">名前を変更</h3>
+            <input type="text" id="rename-input" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; color: #000;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button id="rename-cancel" style="padding: 6px 12px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #eee;">キャンセル</button>
+                <button id="rename-confirm" style="padding: 6px 12px; cursor: pointer; border: 1px solid #007acc; border-radius: 4px; background: #007acc; color: white;">変更</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="browser.js"></script>
+</body>
+
+</html>

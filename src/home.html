@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Tab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="background"></div>
+    <button id="settings-btn" class="settings-btn">⚙</button>
+    <div class="container">
+        <div class="clock-container">
+            <div class="analog-clock">
+                <div class="hand hour-hand" id="hour-hand"></div>
+                <div class="hand minute-hand" id="minute-hand"></div>
+                <div class="hand second-hand" id="second-hand"></div>
+                <div class="center-dot"></div>
+            </div>
+            <div class="date-display" id="date-display"></div>
+        </div>
+        <h1 class="logo" style="margin: 0; font-size: 1rem; letter-spacing: 2px; font-weight: bold; color: rgba(0, 0, 0, 0.3); -webkit-text-stroke: 0.2px rgba(255, 255, 255, 0.5); text-align: center;">TRENDcreate Browser</h1>
+        <div class="search-box">
+            <input type="text" name="q" id="search-query" placeholder="Search Google" class="search-input">
+            <button type="submit" id="btn-ai" class="search-button btn-ai">☆ AI Search</button>
+            <button type="submit" id="btn-normal" class="search-button btn-normal">Search</button>
+        </div>
+        <div class="audio-section" id="drop-zone">
+            <input type="file" id="audio-upload" accept=".mp3, .wav, .m4a, audio/mp3, audio/wav, audio/m4a" style="display: none;">
+            <button id="upload-btn" class="modern-btn">Load MP3/WAV/M4A</button>
+            <p class="drop-text">or Drag & Drop here</p>
+            <div class="controls">
+                 <button id="play-pause-btn" class="modern-btn" disabled>Play</button>
+                 <span id="track-name">No track loaded</span>
+                 <div id="seek-slider-container" class="circular-slider" title="Seek">
+                     <svg viewBox="0 0 40 40" class="circular-slider-svg">
+                         <circle class="circular-slider-bg" cx="20" cy="20" r="16"></circle>
+                         <circle class="circular-slider-progress" id="seek-progress" cx="20" cy="20" r="16"></circle>
+                         <img id="circular-slider-img" src=""></img>
+                     </svg>
+                 </div>
+                 <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+            </div>
+            <canvas id="visualizer"></canvas>
+            <audio id="audio-player"></audio>
+        </div>
+    </div>
+    <script src="jsmediatags.min.js"></script>
+    <script src="home.js"></script>
+</body>
+</html>
