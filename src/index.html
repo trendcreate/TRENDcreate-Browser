@@ -5,6 +5,16 @@
     <meta charset="UTF-8">
     <title>TRENDcreate Browser</title>
     <link rel="stylesheet" href="browser.css">
+    <script>
+        window.addEventListener('error', (event) => {
+            const { ipcRenderer } = require('electron');
+            ipcRenderer.send('log-error', `Error: ${event.message} at ${event.filename}:${event.lineno}`);
+        });
+        window.addEventListener('unhandledrejection', (event) => {
+            const { ipcRenderer } = require('electron');
+            ipcRenderer.send('log-error', `Unhandled Rejection: ${event.reason}`);
+        });
+    </script>
 </head>
 
 <body>

@@ -917,6 +917,7 @@ ${suffix}`;
     }
 
     function startColumnResize(resizer, onMove) {
+        if (!resizer) return;
         resizer.addEventListener("pointerdown", (event) => {
             event.preventDefault();
             resizer.classList.add("dragging");
@@ -1348,7 +1349,6 @@ ${suffix}`;
 
     window.__trendHasUnsavedChanges = false;
     setupColumnResizers();
-    createTab();
     createTab();
 
     window.addEventListener("contextmenu", (e) => {
