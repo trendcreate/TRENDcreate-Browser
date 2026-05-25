@@ -7,35 +7,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const geminiKeyInput = document.getElementById('gemini-key-input');
     const aiModelSelect = document.getElementById('ai-model-select');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
-    
+
     // 戻るボタン
     backBtn.addEventListener('click', () => {
         window.location.href = 'home.html';
     });
 
     // ライセンス情報の読み込み
-    Promise.all([
-        fetch('../LICENSE').then(res => res.text()).catch(() => 'App License not found.'),
-        fetch('LICENSE-jsmediatags.txt').then(res => res.text()).catch(() => 'jsmediatags License not found.')
-    ]).then(([appLicense, jsMediaTagsLicense]) => {
-        const combinedLicenseText = 
+    try {
+        ipcRenderer.invoke('get-license-text').then(licenses => {
+            const combinedLicenseText = 
 `==================================================
 TRENDcreate Browser (MIT License)
 ==================================================
 
-${appLicense}
+${licenses.appLicense}
 
 
 ==================================================
 jsmediatags (BSD License)
 ==================================================
 
-${jsMediaTagsLicense}
+${licenses.jsMediaTagsLicense}
+
+
+==================================================
+Monaco Editor (MIT License)
+==================================================
+
+${licenses.monacoLicense}
 `;
-        licenseText.textContent = combinedLicenseText;
-    }).catch(err => {
+            licenseText.textContent = combinedLicenseText;
+        }).catch(err => {
+            licenseText.textContent = 'ライセンスファイルの読み込みに失敗しました。 / Failed to load license files.';
+        });
+    } catch (err) {
         licenseText.textContent = 'ライセンスファイルの読み込みに失敗しました。 / Failed to load license files.';
-    });
+    }
 
     const savedLang = localStorage.getItem('appLang') || 'ja';
     languageSelect.value = savedLang;

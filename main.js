@@ -252,6 +252,18 @@ function createWindow() {
     }
   });
 
+  ipcMain.handle('get-license-text', async () => {
+    const appLicensePath = path.join(__dirname, 'LICENSE');
+    const jsMediaLicensePath = path.join(__dirname, 'src', 'LICENSE-jsmediatags.txt');
+    const monacoLicensePath = path.join(__dirname, 'src', 'LICENSE-monaco-editor.txt');
+    
+    const appLicense = fs.existsSync(appLicensePath) ? fs.readFileSync(appLicensePath, 'utf-8') : 'App License not found.';
+    const jsMediaTagsLicense = fs.existsSync(jsMediaLicensePath) ? fs.readFileSync(jsMediaLicensePath, 'utf-8') : 'jsmediatags License not found.';
+    const monacoLicense = fs.existsSync(monacoLicensePath) ? fs.readFileSync(monacoLicensePath, 'utf-8') : 'Monaco Editor License not found.';
+    
+    return { appLicense, jsMediaTagsLicense, monacoLicense };
+  });
+
   ipcMain.handle('write-file', async (event, filePath, content) => {
     try {
       fs.writeFileSync(filePath, content, 'utf-8');
