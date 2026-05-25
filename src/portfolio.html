@@ -6,14 +6,9 @@
     <link rel="stylesheet" href="style.css">
     <style>
         body {
-            background-color: #121212;
-            color: #ffffff;
-            margin: 0;
-            padding: 40px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Inherit from style.css */
             overflow-y: auto;
         }
-        
         .portfolio-page-header {
             display: flex;
             justify-content: space-between;
@@ -50,13 +45,21 @@
     </style>
 </head>
 <body>
-    <div class="portfolio-page-header">
-        <h1>Local Projects Portfolio</h1>
-        <button id="open-workspace-btn" class="modern-btn">Change Workspace</button>
-    </div>
-    
-    <div class="portfolio-grid" id="portfolio-grid">
-        <!-- Cards will be injected here -->
+    <div id="background"></div>
+    <div class="container" style="justify-content: flex-start; padding: 40px; width: 100%;">
+        <div class="portfolio-page-header" style="width: 100%;">
+            <h1>Local Projects Portfolio</h1>
+            <button id="open-workspace-btn" class="modern-btn">Change Workspace</button>
+        </div>
+        
+        <div id="breadcrumbs" style="width: 100%; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <button id="go-up-btn" class="modern-btn" style="padding: 5px 10px; font-size: 0.9rem;" disabled>↑ Up</button>
+            <span id="current-path-label" style="font-size: 1.1rem; color: #ccc;"></span>
+        </div>
+        
+        <div class="portfolio-grid" id="portfolio-grid" style="width: 100%;">
+            <!-- Cards will be injected here -->
+        </div>
     </div>
     
     <script src="portfolio.js"></script>

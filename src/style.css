@@ -535,6 +535,26 @@ input[type="range"] {
     opacity: 0.8;
 }
 
+.portfolio-card-preview {
+    width: 100%;
+    height: 120px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+}
+
+.portfolio-card-preview iframe {
+    width: 400%;
+    height: 400%;
+    border: none;
+    pointer-events: none;
+    transform-origin: top left;
+    transform: scale(0.25);
+    background: #ffffff;
+}
+
 .portfolio-card-title {
     font-size: 1.1rem;
     font-weight: bold;

@@ -539,7 +539,18 @@ function createWindow() {
             name: item.name,
             title: title,
             path: projectPath,
-            modifiedAt: stats.mtimeMs
+            modifiedAt: stats.mtimeMs,
+            type: 'directory'
+          });
+        } else if (item.isFile()) {
+          const filePath = path.join(workspacePath, item.name);
+          const stats = fs.statSync(filePath);
+          projects.push({
+            name: item.name,
+            title: item.name,
+            path: filePath,
+            modifiedAt: stats.mtimeMs,
+            type: 'file'
           });
         }
       }

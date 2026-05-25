@@ -561,16 +561,52 @@ webview {
     vertical-align: middle;
 }
 
-#ide-split {
-    display: grid;
-    grid-template-columns: minmax(260px, 1fr) 6px minmax(240px, var(--preview-width));
-    flex: 1;
-    min-height: 0;
-}
+
 
 #monaco-editor {
     min-width: 0;
     min-height: 0;
+}
+
+
+
+#ide-split.single-view #monaco-editor,
+#ide-split.single-view #preview-container {
+    width: 100% !important;
+    height: 100% !important;
+    flex: none;
+}
+
+.view-toggle {
+    display: flex;
+    background: #1e1e1e;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+
+.view-toggle.hidden {
+    display: none;
+}
+
+.view-toggle button {
+    background: transparent;
+    color: #aaa;
+    border: none;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.view-toggle button.active {
+    background: #333;
+    color: #fff;
+}
+
+#editor-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 #preview-container {
@@ -652,10 +688,7 @@ webview {
         flex-basis: min(var(--sidebar-width), 220px);
     }
 
-    #ide-split {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(220px, 1fr) 6px minmax(180px, 42%);
-    }
+    
 
     #preview-pane {
         border-top: 1px solid #34383d;
@@ -673,3 +706,9 @@ webview {
     width: 100%;
     flex: 0 0 6px;
 }
+
+
+
+#ide-split { display: flex; flex: 1; min-height: 0; width: 100%; }
+#monaco-editor { flex: 1; width: 100%; height: 100%; }
+#preview-container { flex: 1; width: 100%; height: 100%; flex-direction: column; }

@@ -21,6 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const sidebarResizer = document.getElementById("sidebar-resizer");
     const previewResizer = document.getElementById("preview-resizer");
     const openFolderBtn = document.getElementById("open-folder-btn");
+    const previewFrame = document.getElementById("preview-frame");
+    const openExternalBtn = document.getElementById("open-external-btn");
+    const viewCodeBtn = document.getElementById("view-code-btn");
+    const viewPreviewBtn = document.getElementById("view-preview-btn");
+    const ideViewToggle = document.getElementById("ide-view-toggle");
+    const monacoEditorDiv = document.getElementById("monaco-editor");
     const newFileBtn = document.getElementById("new-file-btn");
     const saveFileBtn = document.getElementById("save-file-btn");
     const liveServerBtn = document.getElementById("live-server-btn");
@@ -30,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileTree = document.getElementById("file-tree");
     const activeFileLabel = document.getElementById("active-file-label");
     const saveStatus = document.getElementById("save-status");
-    const previewFrame = document.getElementById("preview-frame");
     if (previewFrame) {
         previewFrame.setAttribute("preload", "file://" + nodePath.join(__dirname, "preload.js"));
     }
@@ -508,16 +513,30 @@ ${suffix}`;
                 suggestionsBox.classList.remove("visible");
             } else if (event.channel === "open-portfolio-project") {
                 const projectPath = event.args[0];
-                const indexPath = nodePath.join(projectPath, 'index.html');
                 
-                // Open project in a new tab
-                createTab('file://' + indexPath);
+                // Open IDE Tab
+                createIdeTab();
                 
-                // Also set the IDE workspace
+                // Set the IDE workspace
                 currentRootPath = projectPath;
                 projectRoot.textContent = currentRootPath;
                 fileTree.replaceChildren();
                 await renderDirectory(currentRootPath, fileTree);
+            } else if (event.channel === "open-portfolio-file") {
+                const filePath = event.args[0];
+                const parentPath = filePath.substring(0, Math.max(filePath.lastIndexOf('\\'), filePath.lastIndexOf('/')));
+                
+                // Open IDE Tab
+                createIdeTab();
+                
+                // Set the IDE workspace
+                currentRootPath = parentPath;
+                projectRoot.textContent = currentRootPath;
+                fileTree.replaceChildren();
+                await renderDirectory(currentRootPath, fileTree);
+                
+                // Open the specific file in Monaco
+                await loadFile(filePath);
             }
         });
         webviewEl.addEventListener("new-window", (event) => createTab(event.url));
@@ -562,7 +581,7 @@ ${suffix}`;
 
         const closeBtn = document.createElement("span");
         closeBtn.className = "tab-close";
-        closeBtn.textContent = "×";
+        closeBtn.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
 
         tabEl.append(titleEl, closeBtn);
         tabsContainer.appendChild(tabEl);
@@ -647,6 +666,9 @@ ${suffix}`;
         } else if (url.includes("setting.html")) {
             urlBar.value = "";
             urlBar.placeholder = "設定";
+        } else if (url.includes("portfolio.html")) {
+            urlBar.value = "trendcreate://tcb/portfolio";
+            urlBar.placeholder = "Local Projects Portfolio";
         } else {
             urlBar.value = url;
             urlBar.placeholder = "検索またはURLを入力";
@@ -795,6 +817,13 @@ ${suffix}`;
         const content = editor.getValue();
         const language = getLanguage(currentFilePath);
         let html = content;
+
+        if (language === 'html') {
+            ideViewToggle.classList.remove('hidden');
+        } else {
+            ideViewToggle.classList.add('hidden');
+            switchToCodeView();
+        }
 
         if (language === "css") {
             html = `<!DOCTYPE html><html><head>${getPreviewBaseTag()}<style>${content}</style></head><body><main><h1>CSS Preview</h1><p>Edit styles to update this preview.</p><button>Button</button></main></body></html>`;
@@ -1026,6 +1055,27 @@ ${suffix}`;
     ipcRenderer.on("browser-history-command", (event, direction) => {
         navigateBrowserHistory(direction);
     });
+
+    function switchToCodeView() {
+        viewCodeBtn.classList.add("active");
+        viewPreviewBtn.classList.remove("active");
+        monacoEditorDiv.style.display = "block";
+        previewContainer.style.display = "none";
+        if (editor) {
+            setTimeout(() => editor.layout(), 10);
+        }
+    }
+
+    function switchToPreviewView() {
+        viewCodeBtn.classList.remove("active");
+        viewPreviewBtn.classList.add("active");
+        monacoEditorDiv.style.display = "none";
+        previewContainer.style.display = "flex";
+    }
+
+    viewCodeBtn.addEventListener("click", switchToCodeView);
+    viewPreviewBtn.addEventListener("click", switchToPreviewView);
+
     portfolioBtn.addEventListener("click", () => createTab("portfolio.html"));
     ideToggleBtn.addEventListener("click", createIdeTab);
     backBtn.addEventListener("click", () => {
@@ -1298,6 +1348,7 @@ ${suffix}`;
 
     window.__trendHasUnsavedChanges = false;
     setupColumnResizers();
+    createTab();
     createTab();
 
     window.addEventListener("contextmenu", (e) => {
