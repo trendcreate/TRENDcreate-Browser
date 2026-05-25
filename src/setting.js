@@ -196,6 +196,12 @@ ${licenses.monacoLicense}
                 themeAccentColor.value = '#ff00ff';
                 themeBgImage.value = '';
                 themeOverlayOpacity.value = 0.8;
+            } else if (preset === 'aero') {
+                themeBgColor.value = '#000000';
+                themePrimaryColor.value = '#ffffff';
+                themeAccentColor.value = '#4096ff';
+                themeBgImage.value = '';
+                themeOverlayOpacity.value = 0.2;
             }
             saveAppConfig();
         });

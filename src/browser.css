@@ -649,3 +649,6 @@ webview {
 .link-hover-overlay.hidden {
     display: none;
 }
+/* Focus Mode */
+body.focus-mode #ide-sidebar, body.focus-mode #sidebar-resizer { display: none !important; }
+body.focus-mode #ide-main { border: none; margin: 0 auto; width: 100%; box-shadow: none; }

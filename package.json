@@ -1,6 +1,6 @@
 {
   "name": "trendcreate_browser",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -26,6 +26,18 @@
     "directories": {
       "output": "dist"
     },
+    "fileAssociations": [
+      {
+        "ext": "html",
+        "name": "HTML Document",
+        "role": "Viewer"
+      },
+      {
+        "ext": "pdf",
+        "name": "PDF Document",
+        "role": "Viewer"
+      }
+    ],
     "files": [
       "main.js",
       "manifest.json",

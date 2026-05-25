@@ -60,10 +60,30 @@ function savePasswords(passwords) {
   } catch (e) { console.error("Failed to save passwords", e); }
 }
 
+let mainWindow = null;
+
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+  process.exit(0);
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+      
+      const fileArg = commandLine.find(arg => arg.toLowerCase().endsWith('.html') || arg.toLowerCase().endsWith('.pdf'));
+      if (fileArg && fs.existsSync(fileArg)) {
+        mainWindow.webContents.send('open-external-file', fileArg);
+      }
+    }
+  });
+}
+
 function createWindow() {
   let closeConfirmed = false;
 
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     titleBarStyle: 'hidden',
@@ -98,6 +118,13 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
   mainWindow.setAutoHideMenuBar(true);
   mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    const fileArg = process.argv.find(arg => arg.toLowerCase().endsWith('.html') || arg.toLowerCase().endsWith('.pdf'));
+    if (fileArg && fs.existsSync(fileArg)) {
+      mainWindow.webContents.send('open-external-file', fileArg);
+    }
+  });
 
   mainWindow.on('close', async (event) => {
     if (closeConfirmed) return;

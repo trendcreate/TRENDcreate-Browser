@@ -41,12 +41,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const previewHeader = document.getElementById("preview-header");
     const fileTreeContainer = document.getElementById("file-tree-container");
+    
+    // Writing Mode Elements
+    const novelPlotBtn = document.getElementById("novel-plot-btn");
+    const novelSettingBtn = document.getElementById("novel-setting-btn");
+    const writingModeBtn = document.getElementById("writing-mode-btn");
+    const charCountLabel = document.getElementById("char-count");
+    const aiAssistToggleBtn = document.getElementById("ai-assist-toggle-btn");
+    const toggleWritingDirectionBtn = document.getElementById("toggle-writing-direction-btn");
+    const novelVerticalEditor = document.getElementById("novel-vertical-editor");
+    const toggleFocusModeBtn = document.getElementById("toggle-focus-mode-btn");
 
     const activityFilesBtn = document.getElementById("activity-files-btn");
     const activityConsoleBtn = document.getElementById("activity-console-btn");
     const ideSidebarConsole = document.getElementById("ide-sidebar-console");
 
     const HOME_URL = "home.html";
+
+    window.isWritingMode = false;
+    window.isAiAssistEnabled = true;
+
     const DEFAULT_HTML = `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -163,6 +177,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!apiKey) return { items: [] };
 
                 const aiModel = config.aiModel || 'gemini-3.1-flash-lite';
+
+                // ライティングモードでAIオフの場合は何もしない
+                if (window.isWritingMode && !window.isAiAssistEnabled) {
+                    return { items: [] };
+                }
 
                 // ユーザーが明示的にリクエストした場合のみ（自動補完を無効化）
                 if (context.triggerKind === monaco.languages.InlineCompletionTriggerKind.Automatic) {
@@ -305,10 +324,32 @@ ${suffix}`;
             }
         });
 
+        let autoSaveTimer = null;
         editor.onDidChangeModelContent((e) => {
             hasUnsavedChanges = true;
             updateSaveStatus();
             schedulePreviewUpdate();
+
+            // ライティングモード専用処理：文字数カウントとオートセーブ
+            if (window.isWritingMode) {
+                // 文字数カウント
+                const text = editor.getValue();
+                const charCount = text.replace(/\s/g, '').length;
+                if (charCountLabel) charCountLabel.textContent = `文字数: ${charCount}`;
+
+                // オートセーブ (1秒後)
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(() => {
+                    if (currentFilePath && hasUnsavedChanges) {
+                        fs.writeFile(currentFilePath, editor.getValue(), "utf-8", (err) => {
+                            if (!err) {
+                                hasUnsavedChanges = false;
+                                updateSaveStatus();
+                            }
+                        });
+                    }
+                }, 1000);
+            }
 
             // Auto-close HTML tags
             if (e.changes.length === 1 && e.changes[0].text === '>') {
@@ -808,10 +849,26 @@ ${suffix}`;
         const oldModel = editor.getModel();
         editor.setModel(monaco.editor.createModel(content, getLanguage(filePath)));
         if (oldModel) oldModel.dispose();
+        
+        const novelVerticalEditor = document.getElementById("novel-vertical-editor");
+        if (novelVerticalEditor) {
+            novelVerticalEditor.value = content;
+        }
+
         hasUnsavedChanges = false;
         activeFileLabel.textContent = getFileName(filePath);
         updateSaveStatus();
         updatePreview();
+    }
+
+    async function loadFile(filePath) {
+        if (!(await promptSaveUnsavedChanges())) return;
+        const content = await ipcRenderer.invoke("read-file", filePath);
+        if (content === null) {
+            updateSaveStatus("読み込み失敗");
+            return;
+        }
+        setEditorValue(content, filePath);
     }
 
     function updateSaveStatus(message) {
@@ -1094,7 +1151,16 @@ ${suffix}`;
             if (result.canceled || !result.filePath) return;
             targetPath = result.filePath;
         }
-        const saved = await ipcRenderer.invoke("write-file", targetPath, editor.getValue());
+
+        // Get content based on which editor is visible
+        const verticalEditor = document.getElementById("novel-vertical-editor");
+        let contentToSave = editor.getValue();
+        if (verticalEditor && verticalEditor.style.display !== "none") {
+            contentToSave = verticalEditor.value;
+            editor.setValue(contentToSave); // Sync back to Monaco
+        }
+
+        const saved = await ipcRenderer.invoke("write-file", targetPath, contentToSave);
         if (!saved) {
             updateSaveStatus("保存失敗");
             return;
@@ -1142,10 +1208,12 @@ ${suffix}`;
             previewContainer.style.display = "none";
             if (previewResizer) previewResizer.style.display = "none";
         } else {
+            // プレビューONにする処理
             togglePreviewBtn.textContent = "Preview: ON";
             togglePreviewBtn.classList.add("active");
             previewContainer.style.display = "flex";
             if (previewResizer) previewResizer.style.display = "block";
+            updatePreview();
         }
         if (editor) {
             setTimeout(() => editor.layout(), 10);
@@ -1221,6 +1289,16 @@ ${suffix}`;
             } else if (file.name.toLowerCase().endsWith('.html')) {
                 createTab("file://" + file.path);
             }
+        }
+    });
+
+    ipcRenderer.on('open-external-file', (event, filePath) => {
+        if (!filePath) return;
+        if (filePath.toLowerCase().endsWith('.pdf')) {
+            const pdfUrl = `file://${nodePath.join(__dirname, "pdf-viewer.html")}?file=${encodeURIComponent(filePath)}`;
+            createTab(pdfUrl);
+        } else {
+            createTab(`file:///${filePath.replace(/\\/g, '/')}`);
         }
     });
 
@@ -1449,6 +1527,166 @@ ${suffix}`;
     window.__trendHasUnsavedChanges = false;
     setupColumnResizers();
     createTab();
+
+    // ==========================================
+    // Writing Mode (Focus Mode) Logic
+    // ==========================================
+    if (writingModeBtn) {
+        writingModeBtn.addEventListener("click", () => {
+            window.isWritingMode = !window.isWritingMode;
+            if (window.isWritingMode) {
+                writingModeBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="color:var(--accent-color)"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+                charCountLabel.style.display = "inline";
+                aiAssistToggleBtn.style.display = "inline";
+                if (toggleWritingDirectionBtn) toggleWritingDirectionBtn.style.display = "inline-block";
+                if (toggleFocusModeBtn) toggleFocusModeBtn.style.display = "inline-block";
+                
+                // 初回文字数カウント
+                if (editor) {
+                    const text = editor.getValue();
+                    charCountLabel.textContent = `文字数: ${text.replace(/\\s/g, '').length}`;
+                }
+            } else {
+                document.body.classList.remove("focus-mode");
+                if (toggleFocusModeBtn) {
+                    toggleFocusModeBtn.textContent = "集中モード: OFF";
+                    toggleFocusModeBtn.style.color = "";
+                }
+                writingModeBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+                charCountLabel.style.display = "none";
+                aiAssistToggleBtn.style.display = "none";
+                if (toggleWritingDirectionBtn) toggleWritingDirectionBtn.style.display = "none";
+                if (toggleFocusModeBtn) toggleFocusModeBtn.style.display = "none";
+                if (novelVerticalEditor) novelVerticalEditor.style.display = "none";
+                const monacoContainer = document.getElementById("monaco-editor");
+                if (monacoContainer) monacoContainer.style.display = "block";
+                if (toggleWritingDirectionBtn) {
+                    toggleWritingDirectionBtn.textContent = "横書き (標準)";
+                    toggleWritingDirectionBtn.style.color = "";
+                }
+            }
+            editor.layout();
+        });
+    }
+
+    if (toggleFocusModeBtn) {
+        toggleFocusModeBtn.addEventListener("click", () => {
+            const isFocusMode = document.body.classList.toggle("focus-mode");
+            if (isFocusMode) {
+                toggleFocusModeBtn.textContent = "集中モード: ON";
+                toggleFocusModeBtn.style.color = "var(--accent-color)";
+            } else {
+                toggleFocusModeBtn.textContent = "集中モード: OFF";
+                toggleFocusModeBtn.style.color = "";
+            }
+            editor.layout();
+        });
+    }
+
+    if (aiAssistToggleBtn) {
+        aiAssistToggleBtn.addEventListener("click", () => {
+            window.isAiAssistEnabled = !window.isAiAssistEnabled;
+            if (window.isAiAssistEnabled) {
+                aiAssistToggleBtn.textContent = "AI: ON";
+                aiAssistToggleBtn.classList.remove("ai-off");
+            } else {
+                aiAssistToggleBtn.textContent = "AI: OFF";
+                aiAssistToggleBtn.classList.add("ai-off");
+            }
+        });
+    }
+
+    // ==========================================
+    // Novel Vertical Editor (Textarea)
+    // ==========================================
+    if (toggleWritingDirectionBtn && novelVerticalEditor) {
+        toggleWritingDirectionBtn.addEventListener("click", () => {
+            const monacoContainer = document.getElementById("monaco-editor");
+            if (novelVerticalEditor.style.display === "none") {
+                // Switch to Vertical Editor
+                if (editor) {
+                    novelVerticalEditor.value = editor.getValue();
+                }
+                monacoContainer.style.display = "none";
+                novelVerticalEditor.style.display = "block";
+                toggleWritingDirectionBtn.textContent = "縦書き (専用エディタ)";
+                toggleWritingDirectionBtn.style.color = "var(--accent-color)";
+                novelVerticalEditor.focus();
+            } else {
+                // Switch back to Monaco Editor
+                if (editor) {
+                    editor.setValue(novelVerticalEditor.value);
+                }
+                novelVerticalEditor.style.display = "none";
+                monacoContainer.style.display = "block";
+                toggleWritingDirectionBtn.textContent = "横書き (標準)";
+                toggleWritingDirectionBtn.style.color = "";
+                if (editor) {
+                    editor.layout();
+                    editor.focus();
+                }
+            }
+        });
+        
+        // Sync back on input so character count / unsaved status works
+        novelVerticalEditor.addEventListener("input", () => {
+            if (editor && window.isWritingMode) {
+                editor.setValue(novelVerticalEditor.value);
+            }
+        });
+    }
+
+    // フックして自動プレビュー更新
+    const originalSchedulePreviewUpdate = window.schedulePreviewUpdate;
+    window.schedulePreviewUpdate = function() {
+        if (originalSchedulePreviewUpdate) originalSchedulePreviewUpdate();
+    };
+
+    // ==========================================
+    // Novel Templates
+    // ==========================================
+    function createNovelTemplate(type) {
+        if (!currentRootPath) {
+            alert("Please open a folder first to create templates.");
+            return;
+        }
+
+        const defaultName = type === 'plot' ? 'plot.md' : 'setting.md';
+        
+        // ファイル名の重複を避ける
+        let fileName = defaultName;
+        let counter = 1;
+        while (fs.existsSync(nodePath.join(currentRootPath, fileName))) {
+            fileName = type === 'plot' ? `plot_${counter}.md` : `setting_${counter}.md`;
+            counter++;
+        }
+
+        const filePath = nodePath.join(currentRootPath, fileName);
+        
+        let content = "";
+        if (type === 'plot') {
+            content = `# プロット\n\n## タイトル\n[未設定]\n\n## キャッチコピー\n[未設定]\n\n## あらすじ\n起：\n承：\n転：\n結：\n\n## 登場人物一覧\n- [主人公の名前]\n- \n\n## 各話の構成\n1. \n2. \n`;
+        } else {
+            content = `# 世界観設定\n\n## 時代・場所\n- \n\n## 特殊なルール・魔法・技術\n- \n\n## 主要な組織・勢力\n- \n\n## 用語集\n- **用語1**: 説明\n- **用語2**: 説明\n`;
+        }
+
+        fs.writeFile(filePath, content, "utf-8", async (err) => {
+            if (err) {
+                alert("テンプレートの作成に失敗しました: " + err.message);
+            } else {
+                fileTree.replaceChildren();
+                await renderDirectory(currentRootPath, fileTree);
+                await loadFile(filePath);
+            }
+        });
+    }
+
+    if (novelPlotBtn) {
+        novelPlotBtn.addEventListener("click", () => createNovelTemplate('plot'));
+    }
+    if (novelSettingBtn) {
+        novelSettingBtn.addEventListener("click", () => createNovelTemplate('setting'));
+    }
 
     window.addEventListener("contextmenu", (e) => {
         if (e.target.closest && e.target.closest('.monaco-editor')) return;

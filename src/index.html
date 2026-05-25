@@ -123,6 +123,10 @@
                                 d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14">
                             </path>
                         </svg></button>
+                    <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2); margin: 0 4px;"></div>
+                    <button id="novel-plot-btn" title="新規プロット作成"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></button>
+                    <button id="novel-setting-btn" title="新規世界観設定作成"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+                    <button id="writing-mode-btn" title="Toggle Writing Mode (Focus Mode)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
                 </div>
                 <div id="file-tree-container">
                     <div id="project-root">No folder selected</div>
@@ -137,8 +141,12 @@
                     <span id="active-file-label">untitled.html</span>
                     <div id="ide-view-toggle" class="view-toggle hidden">
                         <button id="toggle-preview-btn">Preview: OFF</button>
+                        <button id="toggle-writing-direction-btn" style="display: none;">横書き (標準)</button>
+                        <button id="toggle-focus-mode-btn" style="display: none;">集中モード: OFF</button>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
+                        <span id="char-count" style="display: none; font-size: 11px; color: #a8c7fa; font-weight: bold;">0 chars</span>
+                        <button id="ai-assist-toggle-btn" class="nav-btn" style="display: none; height: 24px; font-size: 11px; padding: 0 8px; border-radius: 4px; color: #8ab4f8; border: 1px solid rgba(138,180,248,0.5);" title="Toggle AI Assist in Writing Mode">AI: ON</button>
                         <button id="ai-suggest-btn" class="nav-btn"
                             style="height: 24px; font-size: 11px; padding: 0 8px; border-radius: 4px; color: #8ab4f8; border: 1px solid rgba(138,180,248,0.5);"
                             title="Trigger AI Code Suggestion (Ctrl+Enter)">☆</button>
@@ -155,6 +163,7 @@
                         </div>
                         <webview id="preview-frame" style="flex: 1; border: none; background: white;" webpreferences="contextIsolation=false" src="about:blank"></webview>
                     </div>
+                    <textarea id="novel-vertical-editor" style="display: none; flex: 1; padding: 2rem; writing-mode: vertical-rl; text-orientation: upright; font-family: 'Noto Serif JP', serif; font-size: 16px; line-height: 2; resize: none; border: none; outline: none; background: #1e1e1e; color: #d4d4d4; overflow-x: auto; overflow-y: hidden;"></textarea>
                 </div>
             </div>
         </section>

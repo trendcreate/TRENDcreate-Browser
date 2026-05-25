@@ -20,13 +20,16 @@
             root.style.setProperty('--bg-overlay', `rgba(0, 0, 0, ${theme.bgOverlayOpacity})`);
         }
         
+        // Preset class for specific theme CSS (like .theme-aero)
+        root.className = theme.preset ? `theme-${theme.preset}` : '';
+        
         // Background image
         const bgElement = document.getElementById('background');
         
         let finalBgImage = theme.bgImage;
         if (!finalBgImage) {
             const timestamp = Date.now();
-            if (theme.preset === 'cyberpunk') {
+            if (theme.preset === 'cyberpunk' || theme.preset === 'aero') {
                 finalBgImage = `https://picsum.photos/1920/1080?random=${timestamp}`;
             } else {
                 finalBgImage = `https://picsum.photos/1920/1080?grayscale&random=${timestamp}`;
