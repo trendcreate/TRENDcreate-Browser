@@ -449,6 +449,15 @@ ${suffix}`;
         webviewEl.addEventListener("page-title-updated", (event) => {
             titleEl.textContent = event.title || "Untitled";
         });
+        webviewEl.addEventListener("update-target-url", (event) => {
+            const hoverOverlay = document.getElementById("link-hover-overlay");
+            if (activeTabId === tabId && event.url) {
+                hoverOverlay.textContent = event.url;
+                hoverOverlay.classList.remove("hidden");
+            } else if (activeTabId === tabId) {
+                hoverOverlay.classList.add("hidden");
+            }
+        });
         webviewEl.addEventListener("did-navigate", (event) => {
             tabData.currentUrl = event.url;
             if (activeTabId === tabId) updateUrlBar(event.url);
@@ -611,6 +620,10 @@ ${suffix}`;
         } else if (activeTab) {
             updateUrlBar(activeTab.currentUrl);
         }
+        
+        const hoverOverlay = document.getElementById("link-hover-overlay");
+        if (hoverOverlay) hoverOverlay.classList.add("hidden");
+        
         updateNavState();
     }
 
@@ -699,12 +712,20 @@ ${suffix}`;
         localStorage.setItem("browserHistory", JSON.stringify(historyData.slice(0, 1000)));
     }
 
-    function navigateTo(input) {
+    function navigateTo(input, forceType) {
         if (!input) return;
-        const looksLikeUrl = /^https?:\/\//i.test(input) || (input.includes(".") && !input.includes(" "));
+        
         let finalUrl = input;
-        if (!looksLikeUrl) finalUrl = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
-        else if (!/^https?:\/\//i.test(input)) finalUrl = `http://${input}`;
+        
+        if (forceType === "search") {
+            finalUrl = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
+        } else if (forceType === "url") {
+            finalUrl = /^https?:\/\//i.test(input) ? input : `http://${input}`;
+        } else {
+            const looksLikeUrl = /^https?:\/\//i.test(input) || (input.includes(".") && !input.includes(" "));
+            if (!looksLikeUrl) finalUrl = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
+            else if (!/^https?:\/\//i.test(input)) finalUrl = `http://${input}`;
+        }
 
         const webview = getActiveWebview();
         if (webview) webview.loadURL(finalUrl);
@@ -715,12 +736,21 @@ ${suffix}`;
     async function renderSuggestions(query) {
         suggestionsBox.replaceChildren();
         const isUrl = /^https?:\/\//i.test(query) || (query.includes(".") && !query.includes(" "));
-        addSuggestion(isUrl ? "URL" : "検索", isUrl ? query : `${query} - Google 検索`, query);
+        
+        // Always offer both specific commands for the exact query
+        if (isUrl) {
+            addSuggestion("URL", `${query} - URLとして開く`, query, "url");
+            addSuggestion("検索", `${query} - 検索として開く`, query, "search");
+        } else {
+            addSuggestion("検索", `${query} - 検索として開く`, query, "search");
+            addSuggestion("URL", `${query} - URLとして開く`, query, "url");
+        }
+
         if (!isUrl || query.length < 20) {
             try {
                 const response = await fetch(`https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`);
                 const data = await response.json();
-                (data[1] || []).slice(0, 5).forEach((suggestion) => addSuggestion("検索", suggestion, suggestion));
+                (data[1] || []).slice(0, 5).forEach((suggestion) => addSuggestion("検索", suggestion, suggestion, "search"));
             } catch (error) {
                 console.error("Failed to fetch suggestions:", error);
             }
@@ -728,7 +758,7 @@ ${suffix}`;
         suggestionsBox.classList.add("visible");
     }
 
-    function addSuggestion(icon, label, value) {
+    function addSuggestion(icon, label, value, forceType) {
         const item = document.createElement("div");
         item.className = "suggestion-item";
         item.innerHTML = `<span class="suggestion-icon"></span><span class="suggestion-text"></span>`;
@@ -736,7 +766,7 @@ ${suffix}`;
         item.querySelector(".suggestion-text").textContent = label;
         item.addEventListener("click", () => {
             urlBar.value = value;
-            navigateTo(value);
+            navigateTo(value, forceType);
         });
         suggestionsBox.appendChild(item);
     }

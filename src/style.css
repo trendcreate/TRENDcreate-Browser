@@ -1,6 +1,8 @@
 :root {
     --primary-color: #ffffff;
     --bg-overlay: rgba(0, 0, 0, 0.5);
+    --bg-color: #121212;
+    --accent-color: #007acc;
 }
 
 body,
@@ -128,7 +130,7 @@ html {
 }
 
 input:checked+.slider {
-    background-color: #007acc;
+    background-color: var(--accent-color);
 }
 
 input:checked+.slider:before {
@@ -206,9 +208,9 @@ input[type="range"] {
 }
 
 .search-button.btn-ai {
-    border: 3px solid rgba(0, 153, 255, 0.6);
+    border: 3px solid var(--accent-color);
     border-radius: 12px;
-    color: #4285f4;
+    color: var(--accent-color);
     font-weight: bold;
     cursor: pointer;
 }

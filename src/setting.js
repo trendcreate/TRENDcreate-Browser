@@ -8,6 +8,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiModelSelect = document.getElementById('ai-model-select');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
 
+    // Theme Elements
+    const themeBgImage = document.getElementById('theme-bg-image');
+    const themePrimaryColor = document.getElementById('theme-primary-color');
+    const themeBgColor = document.getElementById('theme-bg-color');
+    const themeAccentColor = document.getElementById('theme-accent-color');
+    const themeOverlayOpacity = document.getElementById('theme-overlay-opacity');
+    const themeCards = document.querySelectorAll('.theme-card');
+
+    let currentConfig = {};
+
+    // Tabs logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            btn.classList.add('active');
+            const target = btn.getAttribute('data-tab');
+            document.getElementById(target).classList.add('active');
+        });
+    });
+
     // 戻るボタン
     backBtn.addEventListener('click', () => {
         window.location.href = 'home.html';
@@ -76,29 +101,105 @@ ${licenses.monacoLicense}
     loadSettingsLocal();
 
     async function loadConfig() {
-        const config = await ipcRenderer.invoke('get-config');
-        if (config.darkMode !== false) {
+        currentConfig = await ipcRenderer.invoke('get-config');
+        
+        if (currentConfig.darkMode !== false) {
             darkModeToggle.checked = true;
         }
-        if (config.apiKey) {
-            geminiKeyInput.value = config.apiKey;
+        if (currentConfig.apiKey) {
+            geminiKeyInput.value = currentConfig.apiKey;
         }
-        if (config.aiModel) {
-            aiModelSelect.value = config.aiModel;
+        if (currentConfig.aiModel) {
+            aiModelSelect.value = currentConfig.aiModel;
+        }
+
+        // Load Theme config
+        if (currentConfig.theme) {
+            const t = currentConfig.theme;
+            themeBgImage.value = t.bgImage || '';
+            themePrimaryColor.value = t.primaryColor || '#ffffff';
+            themeBgColor.value = t.bgColor || '#121212';
+            themeAccentColor.value = t.accentColor || '#007acc';
+            themeOverlayOpacity.value = t.bgOverlayOpacity !== undefined ? t.bgOverlayOpacity : 0.5;
+
+            themeCards.forEach(c => c.classList.remove('active'));
+            const activeCard = document.querySelector(`.theme-card[data-preset="${t.preset}"]`);
+            if (activeCard) activeCard.classList.add('active');
+            
+            if (window.applyThemeVariables) {
+                window.applyThemeVariables(t);
+            }
         }
     }
 
     async function saveAppConfig() {
-        const config = await ipcRenderer.invoke('get-config');
-        config.darkMode = darkModeToggle.checked;
-        config.apiKey = geminiKeyInput.value.trim();
-        config.aiModel = aiModelSelect.value;
-        await ipcRenderer.invoke('save-config', config);
+        currentConfig.darkMode = darkModeToggle.checked;
+        currentConfig.apiKey = geminiKeyInput.value.trim();
+        currentConfig.aiModel = aiModelSelect.value;
+        
+        // Save Theme
+        if (!currentConfig.theme) currentConfig.theme = {};
+        currentConfig.theme.bgImage = themeBgImage.value;
+        currentConfig.theme.primaryColor = themePrimaryColor.value;
+        currentConfig.theme.bgColor = themeBgColor.value;
+        currentConfig.theme.accentColor = themeAccentColor.value;
+        currentConfig.theme.bgOverlayOpacity = parseFloat(themeOverlayOpacity.value);
+        
+        const activeCard = document.querySelector('.theme-card.active');
+        if (activeCard) {
+            currentConfig.theme.preset = activeCard.getAttribute('data-preset');
+        }
+
+        if (window.applyThemeVariables) {
+            window.applyThemeVariables(currentConfig.theme);
+        }
+
+        await ipcRenderer.invoke('save-config', currentConfig);
     }
 
     if (darkModeToggle) darkModeToggle.addEventListener('change', saveAppConfig);
     if (geminiKeyInput) geminiKeyInput.addEventListener('input', saveAppConfig);
     if (aiModelSelect) aiModelSelect.addEventListener('change', saveAppConfig);
+
+    // Theme Events
+    [themeBgImage, themePrimaryColor, themeBgColor, themeAccentColor, themeOverlayOpacity].forEach(el => {
+        el.addEventListener('input', saveAppConfig);
+    });
+
+    themeCards.forEach(card => {
+        card.addEventListener('click', () => {
+            themeCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            
+            const preset = card.getAttribute('data-preset');
+            if (preset === 'dark') {
+                themeBgColor.value = '#121212';
+                themePrimaryColor.value = '#ffffff';
+                themeAccentColor.value = '#007acc';
+                themeBgImage.value = '';
+                themeOverlayOpacity.value = 0.5;
+            } else if (preset === 'light') {
+                themeBgColor.value = '#f0f0f0';
+                themePrimaryColor.value = '#121212';
+                themeAccentColor.value = '#007acc';
+                themeBgImage.value = '';
+                themeOverlayOpacity.value = 0;
+            } else if (preset === 'glass') {
+                themeBgColor.value = '#000000';
+                themePrimaryColor.value = '#ffffff';
+                themeAccentColor.value = '#e200ff';
+                themeBgImage.value = 'https://picsum.photos/1920/1080?blur=2';
+                themeOverlayOpacity.value = 0.3;
+            } else if (preset === 'cyberpunk') {
+                themeBgColor.value = '#000000';
+                themePrimaryColor.value = '#00ff00';
+                themeAccentColor.value = '#ff00ff';
+                themeBgImage.value = '';
+                themeOverlayOpacity.value = 0.8;
+            }
+            saveAppConfig();
+        });
+    });
 
     loadConfig();
 

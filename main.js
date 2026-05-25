@@ -10,11 +10,24 @@ function getConfigPath() {
 }
 
 function loadConfig() {
+  let config = {};
   try {
     const p = getConfigPath();
-    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+    if (fs.existsSync(p)) config = JSON.parse(fs.readFileSync(p, 'utf8'));
   } catch (e) { console.error("Failed to load config", e); }
-  return {};
+  
+  // Default theme properties
+  if (!config.theme) {
+    config.theme = {
+      preset: 'dark', // 'dark', 'light', 'glass', etc.
+      primaryColor: '#ffffff',
+      bgColor: '#121212',
+      bgImage: '',
+      bgOverlayOpacity: 0.5,
+      accentColor: '#007acc'
+    };
+  }
+  return config;
 }
 
 function saveConfig(config) {
@@ -253,11 +266,17 @@ function createWindow() {
   });
 
   ipcMain.handle('get-license-text', async () => {
-    const appLicensePath = path.join(__dirname, 'LICENSE');
+    const appLicensePath = path.join(__dirname, 'src', 'LICENSE.txt');
+    const fallbackAppLicensePath = path.join(__dirname, 'LICENSE');
     const jsMediaLicensePath = path.join(__dirname, 'src', 'LICENSE-jsmediatags.txt');
     const monacoLicensePath = path.join(__dirname, 'src', 'LICENSE-monaco-editor.txt');
     
-    const appLicense = fs.existsSync(appLicensePath) ? fs.readFileSync(appLicensePath, 'utf-8') : 'App License not found.';
+    let appLicense = 'App License not found.';
+    if (fs.existsSync(appLicensePath)) {
+        appLicense = fs.readFileSync(appLicensePath, 'utf-8');
+    } else if (fs.existsSync(fallbackAppLicensePath)) {
+        appLicense = fs.readFileSync(fallbackAppLicensePath, 'utf-8');
+    }
     const jsMediaTagsLicense = fs.existsSync(jsMediaLicensePath) ? fs.readFileSync(jsMediaLicensePath, 'utf-8') : 'jsmediatags License not found.';
     const monacoLicense = fs.existsSync(monacoLicensePath) ? fs.readFileSync(monacoLicensePath, 'utf-8') : 'Monaco Editor License not found.';
     

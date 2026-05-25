@@ -15,6 +15,7 @@
             ipcRenderer.send('log-error', `Unhandled Rejection: ${event.reason}`);
         });
     </script>
+    <script src="theme-loader.js"></script>
 </head>
 
 <body>
@@ -158,6 +159,9 @@
             </div>
         </section>
     </main>
+
+    <!-- Link Hover Overlay -->
+    <div id="link-hover-overlay" class="link-hover-overlay hidden"></div>
 
     <script>
         window.nodeRequire = require;
