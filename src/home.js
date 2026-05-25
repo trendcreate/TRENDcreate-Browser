@@ -1,16 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Background Image Load
-    const bgElement = document.getElementById('background');
-    const timestamp = new Date().getTime(); // Prevent cache
-    const imageUrl = `https://picsum.photos/1920/1080?grayscale&random=${timestamp}`;
-    
-    const img = new Image();
-    img.src = imageUrl;
-    img.onload = () => {
-        bgElement.style.backgroundImage = `url('${imageUrl}')`;
-        bgElement.classList.add('loaded');
-    };
-
     // 2. Analog Clock and Date
     const hourHand = document.getElementById('hour-hand');
     const minuteHand = document.getElementById('minute-hand');

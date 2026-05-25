@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+    <link rel="stylesheet" href="pdf-viewer.css">
+    <script src="theme-loader.js"></script>
+</head>
+<body>
+    <div id="toolbar">
+        <div class="toolbar-left">
+            <button id="zoom-out" title="Zoom Out">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <span id="zoom-level">100%</span>
+            <button id="zoom-in" title="Zoom In">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+        </div>
+        <div class="toolbar-center">
+            <span id="title">Loading PDF...</span>
+        </div>
+        <div class="toolbar-right">
+            <button id="prev-page" title="Previous Page">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <span id="page-info">
+                Page <span id="page-num">1</span> of <span id="page-count">--</span>
+            </span>
+            <button id="next-page" title="Next Page">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+    </div>
+    
+    <div id="viewer-container">
+        <canvas id="pdf-canvas"></canvas>
+    </div>
+
+    <!-- Load pdf.js from node_modules -->
+    <script src="../node_modules/pdfjs-dist/build/pdf.mjs" type="module"></script>
+    <script src="pdf-viewer.js" type="module"></script>
+</body>
+</html>

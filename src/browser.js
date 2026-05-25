@@ -715,16 +715,30 @@ ${suffix}`;
     function navigateTo(input, forceType) {
         if (!input) return;
         
+        // Remove surrounding quotes if user copied as path
+        input = input.replace(/^["']|["']$/g, '').trim();
+        
         let finalUrl = input;
         
-        if (forceType === "search") {
+        // Check if it's a local absolute path (e.g., C:\...)
+        const isLocalPath = /^[a-zA-Z]:[\\/]/.test(input) || input.startsWith('/');
+        
+        if (isLocalPath) {
+            finalUrl = `file:///${input.replace(/\\/g, '/')}`;
+        } else if (forceType === "search") {
             finalUrl = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
         } else if (forceType === "url") {
             finalUrl = /^https?:\/\//i.test(input) ? input : `http://${input}`;
         } else {
             const looksLikeUrl = /^https?:\/\//i.test(input) || (input.includes(".") && !input.includes(" "));
             if (!looksLikeUrl) finalUrl = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
-            else if (!/^https?:\/\//i.test(input)) finalUrl = `http://${input}`;
+            else if (!/^https?:\/\//i.test(input) && !/^file:\/\//i.test(input)) finalUrl = `http://${input}`;
+        }
+
+        // PDF判定
+        const urlWithoutQuery = finalUrl.split('?')[0];
+        if (urlWithoutQuery.toLowerCase().endsWith(".pdf")) {
+            finalUrl = `file://${nodePath.join(__dirname, "pdf-viewer.html")}?file=${encodeURIComponent(finalUrl)}`;
         }
 
         const webview = getActiveWebview();
@@ -1186,6 +1200,28 @@ ${suffix}`;
         setTimeout(() => {
             suggestionsBox.classList.remove("visible");
         }, 150);
+    });
+
+    // Drag and Drop support for PDF files
+    document.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    });
+
+    document.addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const files = event.dataTransfer.files;
+        if (files && files.length > 0) {
+            const file = files[0];
+            if (file.name.toLowerCase().endsWith('.pdf')) {
+                const pdfUrl = `file://${nodePath.join(__dirname, "pdf-viewer.html")}?file=${encodeURIComponent(file.path)}`;
+                createTab(pdfUrl);
+            } else if (file.name.toLowerCase().endsWith('.html')) {
+                createTab("file://" + file.path);
+            }
+        }
     });
 
     let currentRenamePath = null;

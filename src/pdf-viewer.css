@@ -1,0 +1,99 @@
+:root {
+    color-scheme: dark light;
+    --primary-color: #f1f3f4;
+    --bg-color: #202124;
+    --accent-color: #007acc;
+    --bg-overlay: rgba(0, 0, 0, 0.52);
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--primary-color);
+    display: flex;
+    flex-direction: column;
+}
+
+#toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: 40px;
+    backdrop-filter: blur(8px);
+}
+
+.toolbar-left, .toolbar-right, .toolbar-center {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toolbar-center {
+    flex: 1;
+    justify-content: center;
+}
+
+#title {
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+}
+
+button {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--primary-color);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+span {
+    font-size: 13px;
+    user-select: none;
+}
+
+#viewer-container {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    /* Use overlay color to darken the background behind the PDF slightly */
+    background: var(--bg-overlay);
+}
+
+#pdf-canvas {
+    background: white;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    margin: 0 auto;
+    display: block;
+}

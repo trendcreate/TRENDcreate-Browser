@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Settings</title>
@@ -17,6 +18,7 @@
             align-items: center;
             height: 100vh;
         }
+
         #background {
             position: fixed;
             inset: 0;
@@ -26,9 +28,11 @@
             transition: opacity 1.5s ease-in-out;
             z-index: -2;
         }
+
         #background.loaded {
             opacity: 1;
         }
+
         #background::after {
             content: "";
             position: absolute;
@@ -36,18 +40,20 @@
             background: var(--bg-overlay, rgba(0, 0, 0, 0.5));
             z-index: -1;
         }
+
         .settings-container {
             width: 85%;
             max-width: 900px;
             height: 85vh;
             background: rgba(0, 0, 0, 0.6);
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(16px);
             display: flex;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
+
         .sidebar {
             width: 250px;
             background: rgba(255, 255, 255, 0.05);
@@ -55,12 +61,14 @@
             display: flex;
             flex-direction: column;
         }
+
         .sidebar-header {
             padding: 20px;
             font-size: 1.5rem;
             font-weight: bold;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         .tab-btn {
             background: transparent;
             color: rgba(255, 255, 255, 0.7);
@@ -72,73 +80,94 @@
             transition: all 0.2s;
             border-left: 3px solid transparent;
         }
+
         .tab-btn:hover {
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
         }
+
         .tab-btn.active {
             background: rgba(255, 255, 255, 0.15);
             color: #fff;
             border-left-color: var(--accent-color, #007acc);
         }
+
         .sidebar-footer {
             margin-top: auto;
             padding: 20px;
         }
+
         .back-btn {
             background: transparent;
             color: white;
-            border: 1px solid rgba(255,255,255,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
         }
+
         .back-btn:hover {
             background: white;
             color: black;
         }
+
         .content-area {
             flex: 1;
             padding: 30px 40px;
             overflow-y: auto;
         }
+
         .tab-content {
             display: none;
         }
+
         .tab-content.active {
             display: block;
             animation: fadeIn 0.3s ease;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .setting-group {
             margin-bottom: 30px;
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             padding: 20px;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .setting-group h3 {
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 1.2rem;
             color: #eeeeee;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 10px;
         }
+
         .form-row {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
         }
+
         .form-row label {
             width: 200px;
             font-weight: bold;
         }
+
         .form-row input[type="text"],
         .form-row input[type="number"],
         .form-row input[type="password"],
@@ -146,29 +175,33 @@
             flex: 1;
             padding: 10px;
             border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             color: white;
             font-size: 1rem;
         }
+
         .form-row input[type="color"] {
             width: 50px;
             height: 40px;
             padding: 2px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 6px;
             cursor: pointer;
         }
-        .form-row input:focus, .form-row select:focus {
+
+        .form-row input:focus,
+        .form-row select:focus {
             outline: none;
             border-color: var(--accent-color, #007acc);
         }
+
         .license-box {
             background: rgba(0, 0, 0, 0.5);
             padding: 15px;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             max-height: 400px;
             overflow-y: auto;
             white-space: pre-wrap;
@@ -176,22 +209,26 @@
             font-size: 0.85rem;
             color: #cccccc;
         }
+
         .theme-card {
             border: 2px solid transparent;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
         }
+
         .theme-card:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
+
         .theme-card.active {
             border-color: var(--accent-color, #007acc);
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
         }
+
         .theme-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -200,6 +237,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="background"></div>
     <div class="settings-container">
@@ -210,22 +248,22 @@
             <button class="tab-btn" data-tab="tab-theme">Theme</button>
             <button class="tab-btn" data-tab="tab-ai">AI Config</button>
             <button class="tab-btn" data-tab="tab-license">Licenses</button>
-            
+
             <div class="sidebar-footer">
-                <button class="back-btn" id="back-btn">← Back</button>
+                <button class="back-btn" id="back-btn">ↁEBack</button>
             </div>
         </div>
 
         <!-- Content Area -->
         <div class="content-area">
-            
+
             <!-- General Tab -->
             <div id="tab-general" class="tab-content active">
                 <div class="setting-group">
                     <h3 id="language-label">Language</h3>
                     <div class="form-row">
                         <select id="language-select">
-                            <option value="ja">日本語 (Japanese)</option>
+                            <option value="ja">日本語(Japanese)</option>
                             <option value="en">English</option>
                         </select>
                     </div>
@@ -271,12 +309,13 @@
                     </div>
                     <div class="form-row">
                         <label>Overlay Opacity</label>
-                        <input type="range" id="theme-overlay-opacity" min="0" max="1" step="0.05" value="0.5" style="flex:1;">
+                        <input type="range" id="theme-overlay-opacity" min="0" max="1" step="0.05" value="0.5"
+                            style="flex:1;">
                     </div>
                 </div>
-                
+
                 <div class="setting-group">
-                    <h3>System Appearance (再起動が必要です)</h3>
+                    <h3>System Appearance (再起動が忁E��でぁE</h3>
                     <div class="setting-item" style="display:flex; align-items:center;">
                         <span style="margin-right:15px; font-weight:bold;">Force WebContents Dark Mode</span>
                         <label class="switch">
@@ -321,4 +360,5 @@
 
     <script src="setting.js"></script>
 </body>
+
 </html>

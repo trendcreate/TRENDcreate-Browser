@@ -1,18 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Background Image Load
-    const bgElement = document.getElementById('background');
-    if (bgElement) {
-        const timestamp = new Date().getTime(); // Prevent cache
-        const imageUrl = `https://picsum.photos/1920/1080?grayscale&random=${timestamp}`;
-        
-        const img = new Image();
-        img.src = imageUrl;
-        img.onload = () => {
-            bgElement.style.backgroundImage = `url('${imageUrl}')`;
-            bgElement.classList.add('loaded');
-        };
-    }
-
     const portfolioGrid = document.getElementById("portfolio-grid");
     const openWorkspaceBtn = document.getElementById("open-workspace-btn");
     const goUpBtn = document.getElementById("go-up-btn");

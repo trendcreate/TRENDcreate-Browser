@@ -22,11 +22,31 @@
         
         // Background image
         const bgElement = document.getElementById('background');
-        if (bgElement && theme.bgImage) {
-            bgElement.style.backgroundImage = `url(${theme.bgImage})`;
+        
+        let finalBgImage = theme.bgImage;
+        if (!finalBgImage) {
+            const timestamp = Date.now();
+            if (theme.preset === 'cyberpunk') {
+                finalBgImage = `https://picsum.photos/1920/1080?random=${timestamp}`;
+            } else {
+                finalBgImage = `https://picsum.photos/1920/1080?grayscale&random=${timestamp}`;
+            }
+        }
+
+        if (bgElement && finalBgImage) {
+            if (bgElement.tagName === 'IMG') {
+                bgElement.src = finalBgImage;
+            } else {
+                bgElement.style.backgroundImage = `url('${finalBgImage}')`;
+            }
             bgElement.classList.add('loaded');
-        } else if (bgElement && !theme.bgImage) {
-            bgElement.style.backgroundImage = 'none';
+        } else if (bgElement) {
+            if (bgElement.tagName === 'IMG') {
+                bgElement.src = '';
+            } else {
+                bgElement.style.backgroundImage = 'none';
+            }
+            bgElement.classList.remove('loaded');
         }
     }
 

@@ -1,12 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const bgElement = document.getElementById("background");
-    const imageUrl = `https://picsum.photos/1080/720?grayscale&random=${Date.now()}`;
-    const img = new Image();
-    img.src = imageUrl;
-    img.onload = () => {
-        bgElement.style.backgroundImage = `url('${imageUrl}')`;
-        bgElement.classList.add("loaded");
-    };
 
     const historyList = document.getElementById("history-list");
     const clearBtn = document.getElementById("clear-history-btn");
