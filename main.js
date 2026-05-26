@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu, webContents } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, webContents, components } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -638,12 +638,29 @@ function createWindow() {
 }
 
 app.commandLine.appendSwitch('lang', 'en-US');
+app.commandLine.appendSwitch('no-verify-widevine-cdm');
 
-app.whenReady().then(() => {
+let widevineReady = false;
+app.on('widevine-ready', (version, lastVersion) => {
+  console.log(`Widevine ${version} is ready!`);
+  widevineReady = true;
+});
+
+app.on('widevine-error', (error) => {
+  console.error('Widevine installation encountered an error:', error);
+});
+
+app.whenReady().then(async () => {
   if (appConfig.darkMode) {
     const { nativeTheme } = require('electron');
     nativeTheme.themeSource = 'dark';
   }
+
+  if (components) {
+    await components.whenReady();
+    console.log('Components ready:', components.status());
+  }
+
   createWindow();
 
   app.on('activate', () => {
