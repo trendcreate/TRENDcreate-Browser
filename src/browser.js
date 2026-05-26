@@ -1824,4 +1824,33 @@ ${suffix}`;
             }
         }
     });
+
+    // --- Alarm Monitoring ---
+    let lastAlarmTriggeredMin = null;
+    setInterval(async () => {
+        try {
+            const config = await ipcRenderer.invoke('get-config');
+            if (config && config.alarmEnabled && config.alarmTime) {
+                const now = new Date();
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                const currentHm = `${hh}:${mm}`;
+                
+                if (currentHm === config.alarmTime && lastAlarmTriggeredMin !== currentHm) {
+                    lastAlarmTriggeredMin = currentHm;
+                    ipcRenderer.send('show-notification', {
+                        title: "TRENDcreate Browser アラーム",
+                        body: `設定した時間（${config.alarmTime}）になりました。`
+                    });
+                }
+                
+                // Reset flag when time changes
+                if (currentHm !== config.alarmTime) {
+                    lastAlarmTriggeredMin = null;
+                }
+            }
+        } catch (e) {
+            console.error("Alarm check failed", e);
+        }
+    }, 15000); // Check every 15 seconds
 });

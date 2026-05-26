@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiModelSelect = document.getElementById('ai-model-select');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const verticalTabsToggle = document.getElementById('vertical-tabs-toggle');
+    const alarmToggle = document.getElementById('alarm-toggle');
+    const alarmTimeInput = document.getElementById('alarm-time-input');
 
     // Theme Elements
     const themeBgImage = document.getElementById('theme-bg-image');
@@ -110,6 +112,12 @@ ${licenses.monacoLicense}
         if (currentConfig.verticalTabs !== undefined) {
             verticalTabsToggle.checked = currentConfig.verticalTabs;
         }
+        if (currentConfig.alarmEnabled !== undefined && alarmToggle) {
+            alarmToggle.checked = currentConfig.alarmEnabled;
+        }
+        if (currentConfig.alarmTime && alarmTimeInput) {
+            alarmTimeInput.value = currentConfig.alarmTime;
+        }
         if (currentConfig.apiKey) {
             geminiKeyInput.value = currentConfig.apiKey;
         }
@@ -139,6 +147,8 @@ ${licenses.monacoLicense}
     async function saveAppConfig() {
         currentConfig.darkMode = darkModeToggle.checked;
         currentConfig.verticalTabs = verticalTabsToggle.checked;
+        if (alarmToggle) currentConfig.alarmEnabled = alarmToggle.checked;
+        if (alarmTimeInput) currentConfig.alarmTime = alarmTimeInput.value;
         currentConfig.apiKey = geminiKeyInput.value.trim();
         currentConfig.aiModel = aiModelSelect.value;
         
@@ -164,6 +174,8 @@ ${licenses.monacoLicense}
 
     if (darkModeToggle) darkModeToggle.addEventListener('change', saveAppConfig);
     if (verticalTabsToggle) verticalTabsToggle.addEventListener('change', saveAppConfig);
+    if (alarmToggle) alarmToggle.addEventListener('change', saveAppConfig);
+    if (alarmTimeInput) alarmTimeInput.addEventListener('change', saveAppConfig);
     if (geminiKeyInput) geminiKeyInput.addEventListener('input', saveAppConfig);
     if (aiModelSelect) aiModelSelect.addEventListener('change', saveAppConfig);
 
@@ -208,6 +220,12 @@ ${licenses.monacoLicense}
                 themeAccentColor.value = '#4096ff';
                 themeBgImage.value = '';
                 themeOverlayOpacity.value = 0.2;
+            } else if (preset === 'aero-core') {
+                themeBgColor.value = '#000000';
+                themePrimaryColor.value = '#ffffff';
+                themeAccentColor.value = '#00e5ff';
+                themeBgImage.value = '';
+                themeOverlayOpacity.value = 0.25;
             }
             saveAppConfig();
         });

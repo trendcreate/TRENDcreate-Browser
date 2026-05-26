@@ -795,6 +795,7 @@ input[type="range"] {
     color: #888;
     margin-top: auto;
 }
+
 /* ==============================================================
    Windows Vista Aero Theme (.theme-aero)
 ============================================================== */
@@ -803,11 +804,13 @@ input[type="range"] {
     --border-style: 1px solid rgba(0, 0, 0, 0.7);
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .theme-aero #background img {
-    mix-blend-mode: normal; 
+    mix-blend-mode: normal;
     opacity: 1;
     filter: brightness(1.1);
 }
+
 .theme-aero .panel,
 .theme-aero button,
 .theme-aero .tab,
@@ -819,12 +822,13 @@ input[type="range"] {
     border: var(--border-style);
     backdrop-filter: blur(10px);
     border-radius: 4px;
-    box-shadow: 
-        0 4px 8px rgba(0, 0, 0, 0.4), 
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.5),
         inset 0 0 2px 1px rgba(255, 255, 255, 0.2);
     overflow: hidden;
 }
+
 .theme-aero .panel::after,
 .theme-aero button::after,
 .theme-aero .tab::after,
@@ -844,12 +848,95 @@ input[type="range"] {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
+
 .theme-aero button:hover,
 .theme-aero button[id^="toggle-"]:hover {
     background: rgba(40, 150, 255, 0.5);
-    box-shadow: 
-        0 0 12px rgba(40, 150, 255, 0.8), 
+    box-shadow:
+        0 0 12px rgba(40, 150, 255, 0.8),
         inset 0 1px 0 rgba(255, 255, 255, 0.8),
         inset 0 0 4px 1px rgba(255, 255, 255, 0.5);
     cursor: pointer;
+}
+
+/* ==============================================================
+    Vista Style Aero (Core) Theme (.theme-aero-core)
+============================================================== */
+.theme-aero-core {
+    --panel-bg: rgba(0, 0, 0, 0.6);
+    --border-style: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.theme-aero-core #background img {
+    mix-blend-mode: normal;
+    opacity: 1;
+    filter: brightness(0.8);
+}
+
+.theme-aero-core .panel,
+.theme-aero-core button,
+.theme-aero-core .tab,
+.theme-aero-core .ide-header,
+.theme-aero-core .toolbar,
+.theme-aero-core .settings-container,
+.theme-aero-core .setting-group,
+.theme-aero-core button[id^="toggle-"] {
+    position: relative;
+    background: var(--panel-bg);
+    border: var(--border-style);
+    backdrop-filter: blur(12px);
+    border-radius: 8px;
+    /* Neumorphism Shadow combined with Glass */
+    box-shadow:
+        6px 6px 12px rgba(0, 0, 0, 0.9),
+        -4px -4px 10px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.theme-aero-core .panel::after,
+.theme-aero-core button::after,
+.theme-aero-core .tab::after,
+.theme-aero-core .ide-header::after,
+.theme-aero-core .toolbar::after,
+.theme-aero-core button[id^="toggle-"]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+    border-radius: inherit;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.theme-aero-core button:hover,
+.theme-aero-core button[id^="toggle-"]:hover {
+    background: rgba(0, 229, 255, 0.2);
+    box-shadow:
+        0 0 15px rgba(0, 229, 255, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 0 4px 1px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+
+/* 一番内側のメイン画面はフラットにする */
+.theme-aero-core webview,
+.theme-aero-core #preview-frame,
+.theme-aero-core .content-area,
+.theme-aero-core .ide-editor-area,
+.theme-aero-core #webviews-container {
+    box-shadow: none !important;
+    border: none !important;
+    background: var(--bg-color);
+    border-radius: 0;
+}
+
+.theme-aero-core .tab-content {
+    box-shadow: none !important;
 }

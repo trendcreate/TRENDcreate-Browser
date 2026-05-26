@@ -1,8 +1,10 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu, webContents, components } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, webContents, components, Notification } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const http = require('http');
+
+app.setAppUserModelId('com.trendcreate.browser');
 
 // Config Management
 function getConfigPath() {
@@ -382,6 +384,12 @@ function createWindow(initialUrl = null) {
     } catch (e) {
       console.error(e);
       return null;
+    }
+  });
+
+  ipcMain.on('show-notification', (event, { title, body }) => {
+    if (Notification.isSupported()) {
+      new Notification({ title, body }).show();
     }
   });
 

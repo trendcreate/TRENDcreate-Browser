@@ -275,17 +275,31 @@
                         <input type="number" id="live-port-input" value="0" min="0" max="65535">
                     </div>
                 </div>
-                <div class="setting-group">
-                    <h3>UI Layout</h3>
-                    <div class="setting-item" style="display:flex; align-items:center;">
-                        <span style="margin-right:15px; font-weight:bold;">Vertical Tabs (タブを縦に並べる)</span>
-                        <label class="switch">
-                            <input type="checkbox" id="vertical-tabs-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
+            <div class="setting-group">
+                <h3>UI Layout</h3>
+                <div class="setting-item" style="display:flex; align-items:center;">
+                    <span style="margin-right:15px; font-weight:bold;">Vertical Tabs (タブを縦に並べる)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="vertical-tabs-toggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
+            <div class="setting-group">
+                <h3>Alarm Settings (アラーム)</h3>
+                <div class="setting-item" style="display:flex; align-items:center; margin-bottom: 10px;">
+                    <span style="margin-right:15px; font-weight:bold;">Alarm Notification (通知をON)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="alarm-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="form-row">
+                    <label>Alarm Time</label>
+                    <input type="time" id="alarm-time-input">
+                </div>
+            </div>
+        </div>
 
             <!-- Theme Tab -->
             <div id="tab-theme" class="tab-content">
@@ -297,6 +311,7 @@
                         <div class="theme-card" data-preset="glass">Glass</div>
                         <div class="theme-card" data-preset="cyberpunk">Cyberpunk</div>
                         <div class="theme-card" data-preset="aero">Aero (Glass)</div>
+                        <div class="theme-card" data-preset="aero-core">Aero (Core)</div>
                     </div>
                 </div>
 
