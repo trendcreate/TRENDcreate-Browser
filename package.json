@@ -21,6 +21,9 @@
     "pdfjs-dist": "^5.7.284"
   },
   "build": {
+    "electronDownload": {
+      "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
+    },
     "appId": "com.trendcreate.browser",
     "productName": "TRENDcreate Browser",
     "directories": {
