@@ -227,7 +227,8 @@ input {
     cursor: pointer;
 }
 
-.suggestion-item:hover {
+.suggestion-item:hover,
+.suggestion-item.selected {
     background: #3c4043;
 }
 

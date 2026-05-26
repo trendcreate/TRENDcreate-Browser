@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let previewTimer = null;
     let previewVersion = 0;
     let suggestionTimer = null;
+    let currentSuggestionIndex = -1;
 
     const monacoBase = new URL("../node_modules/monaco-editor/min/", window.location.href).href;
     window.MonacoEnvironment = {
@@ -789,6 +790,7 @@ ${suffix}`;
     }
 
     async function renderSuggestions(query) {
+        currentSuggestionIndex = -1;
         suggestionsBox.replaceChildren();
         const isUrl = /^https?:\/\//i.test(query) || (query.includes(".") && !query.includes(" "));
         
@@ -1244,8 +1246,43 @@ ${suffix}`;
             else webview.reload();
         }
     });
-    urlBar.addEventListener("keypress", (event) => {
-        if (event.key === "Enter") navigateTo(urlBar.value.trim());
+    function updateSuggestionSelection(items) {
+        items.forEach((item, index) => {
+            if (index === currentSuggestionIndex) {
+                item.classList.add("selected");
+                item.scrollIntoView({ block: "nearest" });
+            } else {
+                item.classList.remove("selected");
+            }
+        });
+    }
+
+    urlBar.addEventListener("keydown", (event) => {
+        const isVisible = suggestionsBox.classList.contains("visible");
+        const items = suggestionsBox.querySelectorAll(".suggestion-item");
+
+        if (isVisible && items.length > 0) {
+            if (event.key === "ArrowDown") {
+                event.preventDefault();
+                currentSuggestionIndex = (currentSuggestionIndex + 1) % items.length;
+                updateSuggestionSelection(items);
+                return;
+            } else if (event.key === "ArrowUp") {
+                event.preventDefault();
+                currentSuggestionIndex = (currentSuggestionIndex - 1 + items.length) % items.length;
+                updateSuggestionSelection(items);
+                return;
+            } else if (event.key === "Enter" && currentSuggestionIndex >= 0) {
+                event.preventDefault();
+                items[currentSuggestionIndex].click();
+                return;
+            }
+        }
+
+        if (event.key === "Enter") {
+            event.preventDefault();
+            navigateTo(urlBar.value.trim());
+        }
     });
     urlBar.addEventListener("input", (event) => {
         const query = event.target.value.trim();

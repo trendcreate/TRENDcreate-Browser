@@ -297,6 +297,14 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
     queryInput.focus();
   }, 50);
+
+  // ⭕ 何も選択されていない時に入力があれば検索バーにフォーカスする
+  document.addEventListener('keydown', function(e) {
+    const isModifier = e.ctrlKey || e.metaKey || e.altKey;
+    if (!isModifier && e.key.length === 1 && document.activeElement !== queryInput && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      queryInput.focus();
+    }
+  });
 });
 
 // Settings Navigation & Language Logic
