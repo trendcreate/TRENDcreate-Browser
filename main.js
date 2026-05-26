@@ -27,6 +27,9 @@ function loadConfig() {
       accentColor: '#007acc'
     };
   }
+  if (config.verticalTabs === undefined) {
+    config.verticalTabs = false;
+  }
   return config;
 }
 
@@ -80,10 +83,10 @@ if (!gotTheLock) {
   });
 }
 
-function createWindow() {
+function createWindow(initialUrl = null) {
   let closeConfirmed = false;
 
-  mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 1200,
     height: 800,
     titleBarStyle: 'hidden',
@@ -116,25 +119,27 @@ function createWindow() {
     }
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-  mainWindow.setMenuBarVisibility(false);
-  mainWindow.setAutoHideMenuBar(true);
-  mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
+  win.setMenuBarVisibility(false);
+  win.setAutoHideMenuBar(true);
+  
+  const options = initialUrl ? { query: { url: initialUrl } } : {};
+  win.loadFile(path.join(__dirname, 'src', 'index.html'), options);
 
-  mainWindow.webContents.on('did-finish-load', () => {
+  win.webContents.on('did-finish-load', () => {
     const fileArg = process.argv.find(arg => arg.toLowerCase().endsWith('.html') || arg.toLowerCase().endsWith('.pdf'));
     if (fileArg && fs.existsSync(fileArg)) {
-      mainWindow.webContents.send('open-external-file', fileArg);
+      win.webContents.send('open-external-file', fileArg);
     }
   });
 
-  mainWindow.on('close', async (event) => {
+  win.on('close', async (event) => {
     if (closeConfirmed) return;
 
     event.preventDefault();
 
     let hasUnsavedChanges = false;
     try {
-      hasUnsavedChanges = await mainWindow.webContents.executeJavaScript(
+      hasUnsavedChanges = await win.webContents.executeJavaScript(
         'Boolean(window.__trendHasUnsavedChanges)',
         true
       );
@@ -143,7 +148,7 @@ function createWindow() {
     }
 
     if (hasUnsavedChanges) {
-      const result = await dialog.showMessageBox(mainWindow, {
+      const result = await dialog.showMessageBox(win, {
         type: 'warning',
         buttons: ['Close', 'Cancel'],
         defaultId: 1,
@@ -157,20 +162,20 @@ function createWindow() {
     }
 
     closeConfirmed = true;
-    mainWindow.close();
+    win.close();
   });
 
   function sendBrowserHistoryCommand(command) {
-    if (!mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('browser-history-command', command);
+    if (!win.isDestroyed()) {
+      win.webContents.send('browser-history-command', command);
     }
   }
 
   function toggleHostDevTools() {
-    if (mainWindow.webContents.isDevToolsOpened()) {
-      mainWindow.webContents.closeDevTools();
+    if (win.webContents.isDevToolsOpened()) {
+      win.webContents.closeDevTools();
     } else {
-      mainWindow.webContents.openDevTools({ mode: 'detach' });
+      win.webContents.openDevTools({ mode: 'detach' });
     }
   }
 
@@ -178,16 +183,16 @@ function createWindow() {
     if (input.type !== 'keyDown') return;
 
     if (input.key === 'F12') {
-      if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('browser-f12-command');
+      if (!win.isDestroyed()) {
+        win.webContents.send('browser-f12-command');
       }
       event.preventDefault();
       return;
     }
 
     if (input.key === 'F5' || (input.control && input.key.toLowerCase() === 'r')) {
-      if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('browser-reload-command', input.shift);
+      if (!win.isDestroyed()) {
+        win.webContents.send('browser-reload-command', input.shift);
       }
       event.preventDefault();
       return;
@@ -213,9 +218,9 @@ function createWindow() {
     }
   }
 
-  mainWindow.webContents.on('before-input-event', handleInputShortcut);
+  win.webContents.on('before-input-event', handleInputShortcut);
 
-  mainWindow.on('app-command', (event, command) => {
+  win.on('app-command', (event, command) => {
     if (command === 'browser-backward') {
       sendBrowserHistoryCommand('back');
       event.preventDefault();
@@ -225,12 +230,43 @@ function createWindow() {
     }
   });
 
-  app.on('web-contents-created', (event, contents) => {
-    contents.on('before-input-event', handleInputShortcut);
-  });
+  if (!global.ipcRegistered) {
+    global.ipcRegistered = true;
 
-  ipcMain.handle('get-config', () => loadConfig());
-  ipcMain.handle('save-config', (event, config) => saveConfig(config));
+    app.on('web-contents-created', (event, contents) => {
+      contents.on('before-input-event', handleInputShortcut);
+      contents.setWindowOpenHandler(({ url }) => {
+        const ownerWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+        if (ownerWindow && !ownerWindow.isDestroyed()) {
+          ownerWindow.webContents.send('open-new-tab', url);
+        }
+        return { action: 'deny' };
+      });
+    });
+
+    ipcMain.on('tear-off-tab', (event, data) => {
+      if (data && data.url) {
+        createWindow(data.url);
+      }
+    });
+
+    ipcMain.handle('get-config', () => loadConfig());
+    ipcMain.handle('save-config', (event, config) => {
+      saveConfig(config);
+      BrowserWindow.getAllWindows().forEach(win => {
+        if (!win.isDestroyed()) {
+          win.webContents.send('config-changed', config);
+        }
+      });
+    });
+
+    ipcMain.on('tab-moved', (event, data) => {
+      BrowserWindow.getAllWindows().forEach(win => {
+        if (!win.isDestroyed()) {
+          win.webContents.send('tab-moved-event', data);
+        }
+      });
+    });
 
   ipcMain.handle('get-passwords', (event, hostname) => {
     const passwords = loadPasswords();
@@ -635,6 +671,7 @@ function createWindow() {
     return projects.sort((a, b) => b.modifiedAt - a.modifiedAt);
   });
 
+  } // end of if(!global.ipcRegistered)
 }
 
 app.commandLine.appendSwitch('lang', 'en-US');
@@ -649,6 +686,9 @@ app.on('widevine-ready', (version, lastVersion) => {
 app.on('widevine-error', (error) => {
   console.error('Widevine installation encountered an error:', error);
 });
+
+// UA偽装: Electronという文字列を消して標準のChromeとして認識させる
+app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
 app.whenReady().then(async () => {
   if (appConfig.darkMode) {

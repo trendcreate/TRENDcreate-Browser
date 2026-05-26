@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const geminiKeyInput = document.getElementById('gemini-key-input');
     const aiModelSelect = document.getElementById('ai-model-select');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const verticalTabsToggle = document.getElementById('vertical-tabs-toggle');
 
     // Theme Elements
     const themeBgImage = document.getElementById('theme-bg-image');
@@ -106,6 +107,9 @@ ${licenses.monacoLicense}
         if (currentConfig.darkMode !== false) {
             darkModeToggle.checked = true;
         }
+        if (currentConfig.verticalTabs !== undefined) {
+            verticalTabsToggle.checked = currentConfig.verticalTabs;
+        }
         if (currentConfig.apiKey) {
             geminiKeyInput.value = currentConfig.apiKey;
         }
@@ -134,6 +138,7 @@ ${licenses.monacoLicense}
 
     async function saveAppConfig() {
         currentConfig.darkMode = darkModeToggle.checked;
+        currentConfig.verticalTabs = verticalTabsToggle.checked;
         currentConfig.apiKey = geminiKeyInput.value.trim();
         currentConfig.aiModel = aiModelSelect.value;
         
@@ -158,6 +163,7 @@ ${licenses.monacoLicense}
     }
 
     if (darkModeToggle) darkModeToggle.addEventListener('change', saveAppConfig);
+    if (verticalTabsToggle) verticalTabsToggle.addEventListener('change', saveAppConfig);
     if (geminiKeyInput) geminiKeyInput.addEventListener('input', saveAppConfig);
     if (aiModelSelect) aiModelSelect.addEventListener('change', saveAppConfig);
 

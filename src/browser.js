@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.isWritingMode = false;
     window.isAiAssistEnabled = true;
+    const browserWindowId = Math.random().toString(36).substring(2);
 
     const DEFAULT_HTML = `<!DOCTYPE html>
 <html lang="ja">
@@ -464,6 +465,7 @@ ${suffix}`;
         webviewEl.id = `webview-${tabId}`;
         webviewEl.src = url;
         webviewEl.setAttribute("preload", "file://" + nodePath.join(__dirname, "preload.js"));
+        webviewEl.setAttribute("allowpopups", "allowpopups");
         webviewEl.className = "webview-hidden";
         webviewsContainer.appendChild(webviewEl);
 
@@ -590,7 +592,10 @@ ${suffix}`;
                 await loadFile(filePath);
             }
         });
-        webviewEl.addEventListener("new-window", (event) => createTab(event.url));
+        webviewEl.addEventListener("new-window", (event) => {
+            event.preventDefault();
+            createTab(event.url);
+        });
         activateTab(tabId);
     }
 
@@ -636,6 +641,33 @@ ${suffix}`;
 
         tabEl.append(titleEl, closeBtn);
         tabsContainer.appendChild(tabEl);
+        
+        // --- Tab Tear-off (Drag & Drop) ---
+        tabEl.draggable = true;
+        tabEl.addEventListener("dragstart", (e) => {
+            document.body.classList.add("dragging-tab");
+            const tab = tabs.find(t => t.id === tabId);
+            if (tab && tab.currentUrl) {
+                const payload = JSON.stringify({
+                    windowId: browserWindowId,
+                    tabId: tabId,
+                    url: tab.currentUrl
+                });
+                e.dataTransfer.setData("text/plain", "trendcreate-tab|" + payload);
+                e.dataTransfer.effectAllowed = "move";
+            }
+        });
+        tabEl.addEventListener("dragend", (e) => {
+            document.body.classList.remove("dragging-tab");
+            if (e.dataTransfer.dropEffect === "none") {
+                const tab = tabs.find(t => t.id === tabId);
+                if (tab && tab.currentUrl) {
+                    ipcRenderer.send('tear-off-tab', { url: tab.currentUrl });
+                    closeTab(tabId);
+                }
+            }
+        });
+        
         return tabEl;
     }
 
@@ -1563,7 +1595,13 @@ ${suffix}`;
 
     window.__trendHasUnsavedChanges = false;
     setupColumnResizers();
-    createTab();
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialUrl = urlParams.get('url');
+    if (initialUrl) {
+        createTab(initialUrl);
+    } else {
+        createTab();
+    }
 
     // ==========================================
     // Writing Mode (Focus Mode) Logic
@@ -1729,5 +1767,61 @@ ${suffix}`;
         if (e.target.closest && e.target.closest('.monaco-editor')) return;
         e.preventDefault();
         ipcRenderer.invoke("show-context-menu");
+    });
+
+    ipcRenderer.on('open-new-tab', (event, url) => {
+        createTab(url);
+    });
+
+    ipcRenderer.on('config-changed', (event, config) => {
+        if (config.verticalTabs) {
+            document.documentElement.classList.add('vertical-tabs');
+        } else {
+            document.documentElement.classList.remove('vertical-tabs');
+        }
+    });
+
+    ipcRenderer.on('tab-moved-event', (event, data) => {
+        if (data && data.windowId === browserWindowId) {
+            closeTab(data.tabId);
+        }
+    });
+
+    let documentDragCounter = 0;
+    document.addEventListener("dragenter", (e) => {
+        documentDragCounter++;
+        document.body.classList.add("dragging-tab");
+    });
+    
+    document.addEventListener("dragleave", (e) => {
+        documentDragCounter--;
+        if (documentDragCounter === 0) {
+            document.body.classList.remove("dragging-tab");
+        }
+    });
+
+    document.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    });
+
+    document.addEventListener("drop", (e) => {
+        documentDragCounter = 0;
+        document.body.classList.remove("dragging-tab");
+        e.preventDefault();
+        
+        const textData = e.dataTransfer.getData("text/plain");
+        if (textData && textData.startsWith("trendcreate-tab|")) {
+            const dataStr = textData.substring("trendcreate-tab|".length);
+            try {
+                const data = JSON.parse(dataStr);
+                if (data.windowId !== browserWindowId) {
+                    createTab(data.url);
+                    ipcRenderer.send('tab-moved', data);
+                }
+            } catch (err) {
+                console.error("Failed to parse dropped tab data", err);
+            }
+        }
     });
 });

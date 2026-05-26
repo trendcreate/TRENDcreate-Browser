@@ -1,11 +1,21 @@
 (async function() {
-    // ipcRenderer exists in electron environment
-    if (!window.ipcRenderer) return;
+    // Ensure ipcRenderer is available
+    let ipcRenderer = window.ipcRenderer;
+    if (!ipcRenderer && typeof require !== 'undefined') {
+        ipcRenderer = require('electron').ipcRenderer;
+        window.ipcRenderer = ipcRenderer;
+    }
+    if (!ipcRenderer) return;
 
     try {
         const config = await window.ipcRenderer.invoke('get-config');
         if (config && config.theme) {
             applyTheme(config.theme);
+        }
+        if (config && config.verticalTabs) {
+            document.documentElement.classList.add('vertical-tabs');
+        } else {
+            document.documentElement.classList.remove('vertical-tabs');
         }
     } catch (e) {
         console.error('Failed to load theme:', e);
@@ -21,7 +31,12 @@
         }
         
         // Preset class for specific theme CSS (like .theme-aero)
-        root.className = theme.preset ? `theme-${theme.preset}` : '';
+        Array.from(root.classList).forEach(c => {
+            if (c.startsWith('theme-')) root.classList.remove(c);
+        });
+        if (theme.preset) {
+            root.classList.add(`theme-${theme.preset}`);
+        }
         
         // Background image
         const bgElement = document.getElementById('background');

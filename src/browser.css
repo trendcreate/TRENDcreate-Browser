@@ -653,3 +653,63 @@ webview {
 /* Focus Mode */
 body.focus-mode #ide-sidebar, body.focus-mode #sidebar-resizer { display: none !important; }
 body.focus-mode #ide-main { border: none; margin: 0 auto; width: 100%; box-shadow: none; }
+
+/* Vertical Tabs Layout */
+html.vertical-tabs body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "tabs nav"
+        "tabs main";
+}
+html.vertical-tabs #browser-ui {
+    display: contents;
+}
+html.vertical-tabs #tabs-container {
+    grid-area: tabs;
+    flex-direction: column;
+    padding: 8px;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: stretch;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+html.vertical-tabs #tabs-container::-webkit-scrollbar {
+    width: 4px;
+    height: 0;
+}
+html.vertical-tabs #tabs {
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+html.vertical-tabs .tab {
+    max-width: none;
+    width: 100%;
+    border-radius: 6px;
+    box-sizing: border-box;
+    height: 36px;
+}
+html.vertical-tabs .tab.active {
+    border: 1px solid var(--accent-color, #007acc);
+}
+html.vertical-tabs #nav-bar {
+    grid-area: nav;
+    -webkit-app-region: drag;
+    padding-right: 150px; /* Space for window controls */
+}
+html.vertical-tabs #nav-bar * {
+    -webkit-app-region: no-drag;
+}
+html.vertical-tabs #workspace {
+    grid-area: main;
+}
+
+/* Drag and Drop Tab Support */
+body.dragging-tab webview {
+    pointer-events: none;
+}
+
