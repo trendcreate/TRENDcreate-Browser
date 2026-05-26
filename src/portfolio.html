@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Portfolio - TRENDcreate Browser</title>
@@ -10,6 +11,7 @@
             /* Inherit from style.css */
             overflow-y: auto;
         }
+
         .portfolio-page-header {
             display: flex;
             justify-content: space-between;
@@ -18,7 +20,7 @@
             padding-bottom: 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .portfolio-page-header h1 {
             margin: 0;
             font-size: 2.5rem;
@@ -27,7 +29,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .modern-btn {
             background: rgba(255, 255, 255, 0.1);
             color: white;
@@ -38,13 +40,14 @@
             transition: all 0.3s;
             font-size: 1rem;
         }
-        
+
         .modern-btn:hover {
             background: rgba(255, 255, 255, 0.2);
             border-color: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
+
 <body>
     <div id="background"></div>
     <div class="container" style="justify-content: flex-start; padding: 40px; width: 100%;">
@@ -52,17 +55,19 @@
             <h1>Local Projects Portfolio</h1>
             <button id="open-workspace-btn" class="modern-btn">Change Workspace</button>
         </div>
-        
+
         <div id="breadcrumbs" style="width: 100%; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-            <button id="go-up-btn" class="modern-btn" style="padding: 5px 10px; font-size: 0.9rem;" disabled>ↁEUp</button>
+            <button id="go-up-btn" class="modern-btn" style="padding: 5px 10px; font-size: 0.9rem;"
+                disabled>path</button>
             <span id="current-path-label" style="font-size: 1.1rem; color: #ccc;"></span>
         </div>
-        
+
         <div class="portfolio-grid" id="portfolio-grid" style="width: 100%;">
             <!-- Cards will be injected here -->
         </div>
     </div>
-    
+
     <script src="portfolio.js"></script>
 </body>
+
 </html>

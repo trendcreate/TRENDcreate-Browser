@@ -1,6 +1,6 @@
 {
   "name": "trendcreate_browser",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^42.2.0",
+    "electron": "https://github.com/castlabs/electron-releases.git#v42.0.0+wvcus",
     "electron-builder": "^26.8.1"
   },
   "dependencies": {
