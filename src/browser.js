@@ -2007,6 +2007,37 @@ ${suffix}`;
         }
     });
 
+    // --- Download Monitoring ---
+    const downloadToast = document.getElementById("download-toast");
+    const downloadFilename = document.getElementById("download-filename");
+    const downloadStatus = document.getElementById("download-status");
+    const downloadProgressFill = document.getElementById("download-progress-fill");
+
+    let downloadTimeout = null;
+
+    ipcRenderer.on('download-progress', (event, data) => {
+        if (downloadToast) {
+            downloadToast.classList.remove("hidden");
+            downloadFilename.textContent = data.filename;
+            const percent = data.total > 0 ? Math.round((data.received / data.total) * 100) : 0;
+            downloadStatus.textContent = `${percent}%`;
+            downloadProgressFill.style.width = `${percent}%`;
+            if (downloadTimeout) clearTimeout(downloadTimeout);
+        }
+    });
+
+    ipcRenderer.on('download-done', (event, data) => {
+        if (downloadToast) {
+            downloadStatus.textContent = data.state === 'completed' ? 'Completed' : 'Failed/Cancelled';
+            if (data.state === 'completed') downloadProgressFill.style.width = '100%';
+            
+            if (downloadTimeout) clearTimeout(downloadTimeout);
+            downloadTimeout = setTimeout(() => {
+                downloadToast.classList.add("hidden");
+            }, 3000);
+        }
+    });
+
     // --- Alarm Monitoring ---
     let lastAlarmTriggeredMin = null;
     setInterval(async () => {

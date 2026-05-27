@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu, webContents, components, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, webContents, components, Notification, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -66,6 +66,7 @@ function savePasswords(passwords) {
 }
 
 let mainWindow = null;
+const activeDownloads = new Set();
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -163,6 +164,19 @@ function createWindow(initialUrl = null) {
         detail: 'Your unsaved changes will be lost if you close.'
       });
 
+      if (result.response !== 0) return;
+    }
+
+    if (activeDownloads.size > 0) {
+      const result = await dialog.showMessageBox(win, {
+        type: 'warning',
+        buttons: ['閉じる', 'キャンセル'],
+        defaultId: 1,
+        cancelId: 1,
+        title: 'ダウンロード中',
+        message: 'ダウンロードを中止しますか？',
+        detail: 'アプリを閉じると、進行中のダウンロードがキャンセルされます。'
+      });
       if (result.response !== 0) return;
     }
 
@@ -685,7 +699,7 @@ function createWindow(initialUrl = null) {
   } // end of if(!global.ipcRegistered)
 }
 
-app.commandLine.appendSwitch('lang', 'en-US');
+app.commandLine.appendSwitch('lang', 'ja-JP');
 app.commandLine.appendSwitch('no-verify-widevine-cdm');
 
 let widevineReady = false;
@@ -711,6 +725,57 @@ app.whenReady().then(async () => {
     await components.whenReady();
     console.log('Components ready:', components.status());
   }
+
+  // Setup default session for Twitter login and downloads
+  const defaultSession = session.defaultSession;
+  defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders['User-Agent'] = app.userAgentFallback;
+    details.requestHeaders['sec-ch-ua'] = '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"';
+    details.requestHeaders['sec-ch-ua-mobile'] = '?0';
+    details.requestHeaders['sec-ch-ua-platform'] = '"Windows"';
+    callback({ requestHeaders: details.requestHeaders });
+  });
+
+  defaultSession.on('will-download', (event, item, webContents) => {
+    activeDownloads.add(item);
+    
+    // Send event to main window
+    const targetWin = BrowserWindow.fromWebContents(webContents) || mainWindow;
+    if (targetWin) {
+      const fileName = item.getFilename();
+      const totalBytes = item.getTotalBytes();
+      
+      item.on('updated', (event, state) => {
+        if (state === 'interrupted') {
+          console.log('Download is interrupted but can be resumed');
+        } else if (state === 'progressing') {
+          if (item.isPaused()) {
+            console.log('Download is paused');
+          } else {
+            if (!targetWin.isDestroyed() && !targetWin.webContents.isDestroyed()) {
+              targetWin.webContents.send('download-progress', {
+                filename: fileName,
+                received: item.getReceivedBytes(),
+                total: totalBytes
+              });
+            }
+          }
+        }
+      });
+      
+      item.once('done', (event, state) => {
+        activeDownloads.delete(item);
+        if (!targetWin.isDestroyed() && !targetWin.webContents.isDestroyed()) {
+          targetWin.webContents.send('download-done', {
+            filename: fileName,
+            state: state
+          });
+        }
+      });
+    } else {
+      item.once('done', () => activeDownloads.delete(item));
+    }
+  });
 
   createWindow();
 
