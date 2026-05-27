@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Settings</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="android.css" media="(max-width: 768px)">
     <script src="theme-loader.js"></script>
     <style>
         body {
@@ -244,10 +245,10 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header" id="settings-title">Settings</div>
-            <button class="tab-btn active" data-tab="tab-general">General</button>
-            <button class="tab-btn" data-tab="tab-theme">Theme</button>
-            <button class="tab-btn" data-tab="tab-ai">AI Config</button>
-            <button class="tab-btn" data-tab="tab-license">Licenses</button>
+            <button class="tab-btn active" data-tab="tab-general" id="tab-general-btn">General</button>
+            <button class="tab-btn" data-tab="tab-theme" id="tab-theme-btn">Theme</button>
+            <button class="tab-btn" data-tab="tab-ai" id="tab-ai-btn">AI Config</button>
+            <button class="tab-btn" data-tab="tab-license" id="tab-license-btn">Licenses</button>
 
             <div class="sidebar-footer">
                 <button class="back-btn" id="back-btn">ↁEBack</button>
@@ -255,7 +256,12 @@
         </div>
 
         <!-- Content Area -->
-        <div class="content-area">
+        <div class="content-area" style="position:relative;">
+            <button id="settings-close-btn" title="Close"
+                style="position:absolute; top:20px; right:20px; background:transparent; border:none; color:white; font-size:24px; cursor:pointer; z-index:10;">✕</button>
+            <!-- Mobile specific top back button -->
+            <button class="back-btn" id="mobile-back-btn"
+                style="display:none; margin-bottom: 20px; background: rgba(255,255,255,0.1);">Back to Home</button>
 
             <!-- General Tab -->
             <div id="tab-general" class="tab-content active">
@@ -265,6 +271,9 @@
                         <select id="language-select">
                             <option value="ja">日本語(Japanese)</option>
                             <option value="en">English</option>
+                            <option value="ko">한국어(Korean)</option>
+                            <option value="zh">中文(Chinese)</option>
+                            <option value="ar">العربية(Arabic)</option>
                         </select>
                     </div>
                 </div>
@@ -275,36 +284,38 @@
                         <input type="number" id="live-port-input" value="0" min="0" max="65535">
                     </div>
                 </div>
-            <div class="setting-group">
-                <h3>UI Layout</h3>
-                <div class="setting-item" style="display:flex; align-items:center;">
-                    <span style="margin-right:15px; font-weight:bold;">Vertical Tabs (タブを縦に並べる)</span>
-                    <label class="switch">
-                        <input type="checkbox" id="vertical-tabs-toggle">
-                        <span class="slider"></span>
-                    </label>
+                <div class="setting-group">
+                    <h3 id="ui-layout-title">UI Layout</h3>
+                    <div class="setting-item" style="display:flex; align-items:center;">
+                        <span id="vertical-tabs-label" style="margin-right:15px; font-weight:bold;">Vertical Tabs
+                            (タブを縦に並べる)</span>
+                        <label class="switch">
+                            <input type="checkbox" id="vertical-tabs-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h3 id="alarm-settings-title">Alarm Settings (アラーム)</h3>
+                    <div class="setting-item" style="display:flex; align-items:center; margin-bottom: 10px;">
+                        <span id="alarm-notification-label" style="margin-right:15px; font-weight:bold;">Alarm
+                            Notification (通知をON)</span>
+                        <label class="switch">
+                            <input type="checkbox" id="alarm-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label id="alarm-time-label">Alarm Time</label>
+                        <input type="time" id="alarm-time-input">
+                    </div>
                 </div>
             </div>
-            <div class="setting-group">
-                <h3>Alarm Settings (アラーム)</h3>
-                <div class="setting-item" style="display:flex; align-items:center; margin-bottom: 10px;">
-                    <span style="margin-right:15px; font-weight:bold;">Alarm Notification (通知をON)</span>
-                    <label class="switch">
-                        <input type="checkbox" id="alarm-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="form-row">
-                    <label>Alarm Time</label>
-                    <input type="time" id="alarm-time-input">
-                </div>
-            </div>
-        </div>
 
             <!-- Theme Tab -->
             <div id="tab-theme" class="tab-content">
                 <div class="setting-group">
-                    <h3>Theme Presets</h3>
+                    <h3 id="theme-presets-title">Theme Presets</h3>
                     <div class="theme-grid" id="theme-presets-container">
                         <div class="theme-card active" data-preset="dark">Dark</div>
                         <div class="theme-card" data-preset="light">Light</div>
@@ -316,34 +327,40 @@
                 </div>
 
                 <div class="setting-group">
-                    <h3>Customization</h3>
+                    <h3 id="customization-title">Customization</h3>
                     <div class="form-row">
-                        <label>Background Image URL</label>
+                        <label id="bg-image-label">Background Image URL</label>
                         <input type="text" id="theme-bg-image" placeholder="https://example.com/image.jpg">
                     </div>
                     <div class="form-row">
-                        <label>Primary Text Color</label>
+                        <label id="primary-text-color-label">Primary Text Color</label>
                         <input type="color" id="theme-primary-color" value="#ffffff">
                     </div>
                     <div class="form-row">
-                        <label>Background Color</label>
+                        <label id="bg-color-label">Background Color</label>
                         <input type="color" id="theme-bg-color" value="#121212">
                     </div>
                     <div class="form-row">
-                        <label>Accent Color</label>
+                        <label id="accent-color-label">Accent Color</label>
                         <input type="color" id="theme-accent-color" value="#007acc">
                     </div>
                     <div class="form-row">
-                        <label>Overlay Opacity</label>
+                        <label id="overlay-opacity-label">Overlay Opacity</label>
                         <input type="range" id="theme-overlay-opacity" min="0" max="1" step="0.05" value="0.5"
                             style="flex:1;">
+                    </div>
+                    <div class="form-row">
+                        <label id="custom-widget-label">Custom Widget HTML</label>
+                        <textarea id="custom-widget-html" rows="5" placeholder="<div>Custom HTML here</div>"
+                            style="flex:1; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:white; font-family:monospace; resize:vertical;"></textarea>
                     </div>
                 </div>
 
                 <div class="setting-group">
-                    <h3>System Appearance (再起動が必要です)</h3>
+                    <h3 id="system-appearance-title">System Appearance (再起動が必要です)</h3>
                     <div class="setting-item" style="display:flex; align-items:center;">
-                        <span style="margin-right:15px; font-weight:bold;">Force WebContents Dark Mode</span>
+                        <span id="force-dark-mode-label" style="margin-right:15px; font-weight:bold;">Force WebContents
+                            Dark Mode</span>
                         <label class="switch">
                             <input type="checkbox" id="dark-mode-toggle">
                             <span class="slider"></span>
@@ -385,6 +402,17 @@
     </div>
 
     <script src="setting.js"></script>
+    <script>
+        document.getElementById('settings-close-btn').addEventListener('click', () => {
+            window.location.href = 'home.html';
+        });
+        // Click outside to close (clicks directly on body)
+        document.body.addEventListener('click', (e) => {
+            if (e.target === document.body) {
+                window.location.href = 'home.html';
+            }
+        });
+    </script>
 </body>
 
 </html>

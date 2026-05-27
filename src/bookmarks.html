@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Bookmarks</title>
+    <style>
+        :root {
+            --primary-color: #ffffff;
+            --bg-overlay: rgba(0, 0, 0, 0.52);
+            --panel-bg: rgba(0, 0, 0, 0.42);
+            --panel-border: rgba(255, 255, 255, 0.2);
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            color: var(--primary-color);
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        #background {
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        #background.loaded {
+            opacity: 1;
+        }
+
+        #background::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--bg-overlay);
+            z-index: -1;
+        }
+
+        .page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100%;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: min(940px, 100%);
+            max-height: min(760px, calc(100vh - 80px));
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 28px;
+            border: 2px solid var(--panel-border);
+            border-radius: 12px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+        }
+
+        h1 {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 1.55rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .clear-btn {
+            flex: 0 0 auto;
+            padding: 10px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            color: #fff;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .clear-btn:hover {
+            color: #000;
+            background: #fff;
+        }
+
+        .bookmarks-list {
+            list-style: none;
+            padding: 10px 0 0;
+            margin: 0;
+            overflow: auto;
+        }
+
+        .bookmarks-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .bookmarks-list::-webkit-scrollbar-thumb {
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        .bookmark-item {
+            display: grid;
+            grid-template-columns: 30px minmax(0, 1fr) 100px;
+            gap: 16px;
+            align-items: center;
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            transition: background 0.2s ease;
+        }
+
+        .bookmark-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .bookmark-info {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .bookmark-title {
+            overflow: hidden;
+            color: #fff;
+            text-decoration: none;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 600;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .bookmark-title:hover {
+            text-decoration: underline;
+        }
+
+        .bookmark-url {
+            overflow: hidden;
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 0.85rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .bookmark-time {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.85rem;
+            letter-spacing: 0.4px;
+            text-align: right;
+        }
+
+        .empty-message {
+            padding: 52px 0;
+            color: rgba(255, 255, 255, 0.76);
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 700px) {
+            .page {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .bookmark-item {
+                grid-template-columns: 30px 1fr;
+                gap: 6px;
+            }
+            .bookmark-time {
+                display: none;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="android.css" media="(max-width: 768px)">
+    <script src="theme-loader.js"></script>
+</head>
+<body>
+    <div id="background"></div>
+    <main class="page">
+        <section class="container">
+            <div class="header">
+                <h1>Bookmarks</h1>
+                <div style="display:flex; gap:10px;">
+                    <button id="delete-selected-btn" class="clear-btn" style="display:none;">Delete Selected</button>
+                    <button id="clear-bookmarks-btn" class="clear-btn">Clear All</button>
+                    <button id="close-page-btn" class="clear-btn" title="Close" style="font-weight:bold; padding: 10px 15px;">✕</button>
+                </div>
+            </div>
+            <ul id="bookmarks-list" class="bookmarks-list"></ul>
+        </section>
+    </main>
+    <script src="bookmarks.js"></script>
+    <script>
+        document.getElementById('close-page-btn').addEventListener('click', () => {
+            window.location.href = 'home.html';
+        });
+        // Click outside to close
+        document.querySelector('.page').addEventListener('click', (e) => {
+            if (e.target.classList.contains('page')) {
+                window.location.href = 'home.html';
+            }
+        });
+    </script>
+</body>
+</html>

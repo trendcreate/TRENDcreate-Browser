@@ -63,12 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function initAudio() {
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            analyser.fftSize = 256;
-            source = audioContext.createMediaElementSource(audioPlayer);
-            source.connect(analyser);
-            analyser.connect(audioContext.destination);
-            drawVisualizer();
+            
+            // Skip visualizer attachment on Capacitor to avoid MediaError/CORS issues
+            if (!window.Capacitor) {
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source = audioContext.createMediaElementSource(audioPlayer);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                drawVisualizer();
+            } else {
+                // For Capacitor, just clear canvas to avoid black screen and don't attach node
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            }
         }
         if (audioContext.state === 'suspended') {
             audioContext.resume();
@@ -111,9 +118,17 @@ document.addEventListener('DOMContentLoaded', () => {
             trackName.textContent = file.name;
             playPauseBtn.disabled = false;
             
-            // Auto play
-            initAudio();
-            audioPlayer.play();
+            // Auto play only on Desktop. On Mobile, require user to press Play.
+            if (!window.Capacitor) {
+                initAudio();
+                audioPlayer.play();
+                playPauseBtn.textContent = 'Pause';
+                circularSliderimg.style.animationPlayState = "running";
+            } else {
+                playPauseBtn.textContent = 'Play';
+                circularSliderimg.style.animationPlayState = "paused";
+            }
+
             jsmediatags.read(file, {
                 onSuccess: function(tag) {
                     const picture = tag.tags.picture;
@@ -147,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     seekProgress.style.strokeDashoffset = isNaN(offset) ? CIRCUMFERENCE : offset;
                 }
             });
-            playPauseBtn.textContent = 'Pause';
         } else {
             alert('Please select an MP3 / WAV / M4A file.');
         }
@@ -256,15 +270,30 @@ function submitSearch(isAiMode) {
   let url = '';
 
   if (isAiMode) {
-    url = `https://google.com/search?q=${query}&udm=50`;
+    url = `https://google.com/search?q=${query}&udm=50&igu=1`;
   } else {
     // 通常のGoogle検索
-    url = `https://google.com/search?q=${query}`;
+    url = `https://google.com/search?q=${query}&igu=1`;
   }
 
   // 拡張機能のAPIを使って現在のタブを切り替える
   if (typeof chrome !== 'undefined' && chrome.tabs) {
     chrome.tabs.update({ url: url });
+  } else if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+    // Save to history for Capacitor
+    const historyData = JSON.parse(localStorage.getItem("browserHistory") || "[]");
+    historyData.unshift({
+        url: url,
+        title: "Search: " + decodeURIComponent(query),
+        timestamp: Date.now()
+    });
+    if (historyData.length > 100) historyData.splice(100);
+    localStorage.setItem("browserHistory", JSON.stringify(historyData));
+
+    // In-App Browser for Capacitor is REQUIRED.
+    // Direct window.location.href to an external site destroys the Capacitor bridge
+    // and causes the Android hardware back button to crash the app.
+    window.Capacitor.Plugins.Browser.open({ url: url });
   } else {
     window.location.href = url;
   }
@@ -328,9 +357,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 searchPlaceholder: 'Google で検索',
                 btnAi: '☆ AI検索',
                 btnNormal: '検索',
-                uploadBtn: 'Load MP3/WAV/M4A',
-                dropText: 'or Drag & Drop here',
-                noTrack: 'No track loaded'
+                uploadBtn: '音楽読み込み (MP3/WAV/M4A)',
+                dropText: 'またはここにドロップ',
+                noTrack: 'トラック未読み込み'
             },
             en: {
                 settingsBtn: '⚙',
@@ -340,10 +369,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 uploadBtn: 'Load MP3/WAV/M4A',
                 dropText: 'or Drag & Drop here',
                 noTrack: 'No track loaded'
+            },
+            ko: {
+                settingsTitle: '설정',
+                settingsBtn: '⚙',
+                searchPlaceholder: 'Google 검색',
+                btnAi: '☆ AI 검색',
+                btnNormal: '검색',
+                uploadBtn: '음악 불러오기 (MP3/WAV/M4A)',
+                dropText: '또는 여기에 드롭하세요',
+                noTrack: '트랙 없음'
+            },
+            zh: {
+                settingsBtn: '⚙',
+                searchPlaceholder: '在 Google 搜索',
+                btnAi: '☆ AI 搜索',
+                btnNormal: '搜索',
+                uploadBtn: '加载音乐 (MP3/WAV/M4A)',
+                dropText: '或拖放到此处',
+                noTrack: '未加载曲目'
+            },
+            ar: {
+                settingsBtn: '⚙',
+                searchPlaceholder: 'ابحث في Google',
+                btnAi: '☆ بحث AI',
+                btnNormal: 'بحث',
+                uploadBtn: 'تحميل موسيقى (MP3/WAV/M4A)',
+                dropText: 'أو اسحب وأفلت هنا',
+                noTrack: 'لا يوجد مقطع صوتي'
             }
         };
 
-        const t = uiText[lang];
+        const t = uiText[lang] || uiText['en'];
         if (!t) return;
 
         const settingsBtnEl = document.getElementById('settings-btn');
@@ -367,6 +424,50 @@ document.addEventListener('DOMContentLoaded', function() {
         const trackNameEl = document.getElementById('track-name');
         if (trackNameEl && (trackNameEl.textContent === 'No track loaded' || trackNameEl.textContent === 'トラック未読み込み')) {
             trackNameEl.textContent = t.noTrack;
+        }
+    }
+
+    // Load and render custom widget
+    const customWidgetHtml = localStorage.getItem('customWidgetHtml');
+    if (customWidgetHtml) {
+        const container = document.getElementById('custom-widget-container');
+        if (container) {
+            const cleanHtml = DOMPurify.sanitize(customWidgetHtml, { RETURN_DOM: false });
+            container.innerHTML = cleanHtml;
+        }
+    }
+
+    // Hamburger Menu Logic
+    const hamburgerBtn = document.getElementById('home-hamburger-btn');
+    const mobileMenu = document.getElementById('home-mobile-menu');
+    const menuCloseBtn = document.getElementById('home-menu-close');
+    const menuHistoryBtn = document.getElementById('menu-history-btn');
+    const menuBookmarksBtn = document.getElementById('menu-bookmarks-btn');
+    const menuSettingsBtn = document.getElementById('menu-settings-btn');
+    const menuNotepadBtn = document.getElementById('menu-notepad-btn');
+
+    // Show hamburger menu button if we are in Capacitor
+    if (window.Capacitor && hamburgerBtn) {
+        hamburgerBtn.style.display = 'block';
+        // Hide standard settings button on mobile to avoid duplicates
+        const stdSettings = document.getElementById('settings-btn');
+        if (stdSettings) stdSettings.style.display = 'none';
+    }
+
+    if (hamburgerBtn && mobileMenu) {
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.style.display = 'flex';
+        });
+        menuCloseBtn.addEventListener('click', () => {
+            mobileMenu.style.display = 'none';
+        });
+
+        // Use location.assign or location.href to navigate within Capacitor WebView
+        if (menuHistoryBtn) menuHistoryBtn.addEventListener('click', () => window.location.href = 'history.html');
+        if (menuBookmarksBtn) menuBookmarksBtn.addEventListener('click', () => window.location.href = 'bookmarks.html');
+        if (menuSettingsBtn) menuSettingsBtn.addEventListener('click', () => window.location.href = 'setting.html');
+        if (menuNotepadBtn) {
+            menuNotepadBtn.addEventListener('click', () => window.location.href = 'notepad.html');
         }
     }
 });

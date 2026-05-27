@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Notepad</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="android.css" media="(max-width: 768px)">
+    <script src="theme-loader.js"></script>
+    <style>
+        :root {
+            --primary-color: #ffffff;
+            --bg-overlay: rgba(0, 0, 0, 0.52);
+            --panel-bg: rgba(0, 0, 0, 0.42);
+            --panel-border: rgba(255, 255, 255, 0.2);
+        }
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            color: var(--primary-color);
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        #background {
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        #background.loaded {
+            opacity: 1;
+        }
+
+        #background::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--bg-overlay);
+            z-index: -1;
+        }
+
+        .page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            border: 2px solid var(--panel-border);
+            border-radius: 12px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .action-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        #notepad-textarea {
+            flex: 1;
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        #notepad-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .status-bar {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="background"></div>
+    <main class="page">
+        <section class="container">
+            <div class="header">
+                <h1>Notepad</h1>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <span id="save-status" style="font-size:0.85rem; color:rgba(255,255,255,0.7); display:none;">Saved</span>
+                    <button id="clear-btn" class="action-btn">Clear</button>
+                    <button id="close-page-btn" class="action-btn" title="Close" style="padding: 8px 12px;">✕</button>
+                </div>
+            </div>
+            <textarea id="notepad-textarea" placeholder="Type your notes here... (Auto-saved)"></textarea>
+            <div class="status-bar" id="char-count">0 characters</div>
+        </section>
+    </main>
+    <script src="notepad.js"></script>
+    <script>
+        document.getElementById('close-page-btn').addEventListener('click', () => {
+            window.location.href = 'home.html';
+        });
+        document.querySelector('.page').addEventListener('click', (e) => {
+            if (e.target.classList.contains('page')) {
+                window.location.href = 'home.html';
+            }
+        });
+    </script>
+</body>
+</html>

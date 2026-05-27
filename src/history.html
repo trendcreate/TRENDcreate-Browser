@@ -189,6 +189,7 @@
         }
     </style>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="android.css" media="(max-width: 768px)">
     <script src="theme-loader.js"></script>
 </head>
 <body>
@@ -197,11 +198,26 @@
         <section class="container">
             <div class="header">
                 <h1>History</h1>
-                <button id="clear-history-btn" class="clear-btn">Clear History</button>
+                <div style="display:flex; gap:10px;">
+                    <button id="delete-selected-btn" class="clear-btn" style="display:none;">Delete Selected</button>
+                    <button id="clear-history-btn" class="clear-btn">Clear History</button>
+                    <button id="close-page-btn" class="clear-btn" title="Close" style="font-weight:bold; padding: 10px 15px;">✕</button>
+                </div>
             </div>
             <ul id="history-list" class="history-list"></ul>
         </section>
     </main>
     <script src="history.js"></script>
+    <script>
+        document.getElementById('close-page-btn').addEventListener('click', () => {
+            window.location.href = 'home.html';
+        });
+        // Click outside to close
+        document.querySelector('.page').addEventListener('click', (e) => {
+            if (e.target.classList.contains('page')) {
+                window.location.href = 'home.html';
+            }
+        });
+    </script>
 </body>
 </html>

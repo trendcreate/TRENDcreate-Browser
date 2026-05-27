@@ -5,14 +5,25 @@
     <meta charset="UTF-8">
     <title>TRENDcreate Browser</title>
     <link rel="stylesheet" href="browser.css">
+    <link rel="stylesheet" href="android.css" media="(max-width: 768px)">
     <script>
+        // If we are in Capacitor (mobile) or a standard browser where require is not defined, 
+        // the Electron <webview> and browser shell won't work. Redirect to home.html.
+        if (typeof require === 'undefined' || window.Capacitor) {
+            window.location.replace('home.html');
+        }
+
         window.addEventListener('error', (event) => {
-            const { ipcRenderer } = require('electron');
-            ipcRenderer.send('log-error', `Error: ${event.message} at ${event.filename}:${event.lineno}`);
+            if (typeof require !== 'undefined') {
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('console-message', { type: 'error', message: event.error ? event.error.stack : event.message });
+            }
         });
         window.addEventListener('unhandledrejection', (event) => {
-            const { ipcRenderer } = require('electron');
-            ipcRenderer.send('log-error', `Unhandled Rejection: ${event.reason}`);
+            if (typeof require !== 'undefined') {
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('console-message', { type: 'error', message: event.reason ? event.reason.stack : event.reason });
+            }
         });
     </script>
     <script src="theme-loader.js"></script>
@@ -41,7 +52,14 @@
                 </svg></button>
         </div>
         <div id="nav-bar">
-            <button id="back-btn" class="nav-btn" disabled title="Back"><svg viewBox="0 0 24 24" width="16" height="16"
+            <button id="hamburger-menu-btn" class="nav-btn" style="display:none;" title="Menu">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <button id="back-btn" class="nav-btn desktop-nav" disabled title="Back"><svg viewBox="0 0 24 24" width="16" height="16"
                     stroke="currentColor" stroke-width="2" fill="none">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg></button>
@@ -56,8 +74,16 @@
                 </svg></button>
             <div id="url-bar-container">
                 <input type="text" id="url-bar" placeholder="Search or enter URL" autocomplete="off">
+                <button id="bookmark-star-btn" class="nav-btn" title="Bookmark this page" style="position:absolute; right:5px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#8ab4f8; display:none;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </button>
                 <div id="suggestions-box"></div>
             </div>
+            <button id="bookmarks-list-btn" class="nav-btn" title="Bookmarks"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg></button>
             <button id="history-btn" class="nav-btn" title="History"><svg viewBox="0 0 24 24" width="16" height="16"
                     stroke="currentColor" stroke-width="2" fill="none">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -76,6 +102,22 @@
                         d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                     </path>
                 </svg></button>
+        </div>
+    </div>
+
+    <!-- Mobile Hamburger Menu Overlay -->
+    <div id="mobile-menu-overlay" style="display:none;">
+        <div id="mobile-menu-content">
+            <button id="mobile-close-menu-btn" class="nav-btn" style="align-self: flex-end; margin-bottom: 10px;">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <button id="mobile-history-btn" class="modern-btn">History</button>
+            <button id="mobile-bookmarks-btn" class="modern-btn">Bookmarks</button>
+            <button id="mobile-settings-btn" class="modern-btn">Settings</button>
+            <button id="mobile-ide-toggle-btn" class="modern-btn" style="margin-top:auto;">Toggle IDE</button>
         </div>
     </div>
 

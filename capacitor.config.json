@@ -1,0 +1,10 @@
+{
+  "appId": "com.trendcreate.browser",
+  "appName": "TRENDcreate Browser",
+  "webDir": "src",
+  "server": {
+    "allowNavigation": [
+      "*"
+    ]
+  }
+}

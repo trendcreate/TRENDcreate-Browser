@@ -5,11 +5,37 @@
     <meta charset="UTF-8">
     <title>New Tab</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="android.css" media="(max-width: 768px)">
     <script src="theme-loader.js"></script>
+    <script src="../node_modules/dompurify/dist/purify.min.js"></script>
 </head>
 
 <body>
     <div id="background"></div>
+    <!-- Mobile Hamburger Menu Button -->
+    <button id="home-hamburger-btn" class="nav-btn" title="Menu" style="display:none; position:absolute; top:15px; left:15px; z-index:100; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:var(--primary-color, white); padding:8px;">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+    
+    <!-- Mobile Hamburger Menu Overlay -->
+    <div id="home-mobile-menu" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:10000;">
+        <div style="background:rgba(20,20,20,0.95); width:250px; height:100%; padding:20px; display:flex; flex-direction:column; gap:15px; box-shadow:2px 0 15px rgba(0,0,0,0.5); border-right:1px solid rgba(255,255,255,0.2);">
+            <button id="home-menu-close" style="align-self:flex-end; background:transparent; border:none; color:white; padding:5px; cursor:pointer;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <button id="menu-history-btn" class="modern-btn" style="width:100%; text-align:left; font-size:16px;">History</button>
+            <button id="menu-bookmarks-btn" class="modern-btn" style="width:100%; text-align:left; font-size:16px;">Bookmarks</button>
+            <button id="menu-settings-btn" class="modern-btn" style="width:100%; text-align:left; font-size:16px;">Settings</button>
+            <button id="menu-notepad-btn" class="modern-btn" style="width:100%; text-align:left; font-size:16px; margin-top:auto;">メモ (Notepad)</button>
+        </div>
+    </div>
     <button id="settings-btn" class="settings-btn" title="Settings"><svg viewBox="0 0 24 24" width="20" height="20"
             stroke="currentColor" stroke-width="2" fill="none">
             <circle cx="12" cy="12" r="3"></circle>
@@ -55,6 +81,7 @@
             <canvas id="visualizer"></canvas>
             <audio id="audio-player"></audio>
         </div>
+        <div id="custom-widget-container"></div>
     </div>
     <script src="jsmediatags.min.js"></script>
     <script src="home.js"></script>

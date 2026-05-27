@@ -1,5 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const { ipcRenderer } = window;
+    let { ipcRenderer } = window;
+    
+    // Polyfill for Capacitor/mobile environment
+    if (!ipcRenderer) {
+        ipcRenderer = {
+            invoke: async (cmd, data) => {
+                if (cmd === 'get-license-text') {
+                    return { appLicense: 'MIT', jsMediaTagsLicense: 'BSD', monacoLicense: 'MIT' };
+                }
+                if (cmd === 'get-config') {
+                    return JSON.parse(localStorage.getItem('mobile-config') || '{}');
+                }
+                if (cmd === 'save-config') {
+                    localStorage.setItem('mobile-config', JSON.stringify(data || {}));
+                    return true;
+                }
+                return {};
+            }
+        };
+    }
+
     const backBtn = document.getElementById('back-btn');
     const languageSelect = document.getElementById('language-select');
     const licenseText = document.getElementById('license-text');
@@ -18,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeAccentColor = document.getElementById('theme-accent-color');
     const themeOverlayOpacity = document.getElementById('theme-overlay-opacity');
     const themeCards = document.querySelectorAll('.theme-card');
+    const customWidgetHtmlTextarea = document.getElementById('custom-widget-html');
 
     let currentConfig = {};
 
@@ -40,6 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
     backBtn.addEventListener('click', () => {
         window.location.href = 'home.html';
     });
+    
+    const mobileBackBtn = document.getElementById('mobile-back-btn');
+    if (mobileBackBtn) {
+        mobileBackBtn.addEventListener('click', () => {
+            window.location.href = 'home.html';
+        });
+    }
 
     // ライセンス情報の読み込み
     try {
@@ -184,6 +212,13 @@ ${licenses.monacoLicense}
         el.addEventListener('input', saveAppConfig);
     });
 
+    if (customWidgetHtmlTextarea) {
+        customWidgetHtmlTextarea.value = localStorage.getItem('customWidgetHtml') || '';
+        customWidgetHtmlTextarea.addEventListener('input', () => {
+            localStorage.setItem('customWidgetHtml', customWidgetHtmlTextarea.value);
+        });
+    }
+
     themeCards.forEach(card => {
         card.addEventListener('click', () => {
             themeCards.forEach(c => c.classList.remove('active'));
@@ -242,7 +277,26 @@ ${licenses.monacoLicense}
                 portLabel: 'Live Server ポート (0で自動)',
                 aiKeyLabel: 'Gemini API キー (AI補完用)',
                 aiModelLabel: 'AI モデル',
-                licenseTitle: 'オープンソースライセンス'
+                licenseTitle: 'オープンソースライセンス',
+                uiLayoutTitle: 'UIレイアウト',
+                verticalTabsLabel: 'Vertical Tabs (タブを縦に並べる)',
+                alarmSettingsTitle: 'アラーム設定',
+                alarmNotificationLabel: 'アラーム通知を有効にする',
+                alarmTimeLabel: 'アラーム時刻',
+                themePresetsTitle: 'テーマプリセット',
+                customizationTitle: 'カスタマイズ',
+                bgImageLabel: '背景画像URL',
+                primaryTextColorLabel: 'メインテキスト色',
+                bgColorLabel: '背景色',
+                accentColorLabel: 'アクセント色',
+                overlayOpacityLabel: 'オーバーレイ不透明度',
+                customWidgetLabel: 'カスタムウィジェットHTML',
+                systemAppearanceTitle: 'システム外観 (要再起動)',
+                forceDarkModeLabel: 'WebContentsのダークモードを強制する',
+                tabGeneralBtn: '一般',
+                tabThemeBtn: 'テーマ',
+                tabAiBtn: 'AI設定',
+                tabLicenseBtn: 'ライセンス'
             },
             en: {
                 settingsTitle: 'Settings',
@@ -251,18 +305,159 @@ ${licenses.monacoLicense}
                 portLabel: 'Live Server Port (0 for auto)',
                 aiKeyLabel: 'Gemini API Key (For AI Autocomplete)',
                 aiModelLabel: 'AI Model',
-                licenseTitle: 'Open Source Licenses'
+                licenseTitle: 'Open Source Licenses',
+                uiLayoutTitle: 'UI Layout',
+                verticalTabsLabel: 'Vertical Tabs',
+                alarmSettingsTitle: 'Alarm Settings',
+                alarmNotificationLabel: 'Enable Alarm Notification',
+                alarmTimeLabel: 'Alarm Time',
+                themePresetsTitle: 'Theme Presets',
+                customizationTitle: 'Customization',
+                bgImageLabel: 'Background Image URL',
+                primaryTextColorLabel: 'Primary Text Color',
+                bgColorLabel: 'Background Color',
+                accentColorLabel: 'Accent Color',
+                overlayOpacityLabel: 'Overlay Opacity',
+                customWidgetLabel: 'Custom Widget HTML',
+                systemAppearanceTitle: 'System Appearance (Restart Required)',
+                forceDarkModeLabel: 'Force WebContents Dark Mode',
+                tabGeneralBtn: 'General',
+                tabThemeBtn: 'Theme',
+                tabAiBtn: 'AI Config',
+                tabLicenseBtn: 'Licenses'
+            },
+            ko: {
+                settingsTitle: '설정',
+                backBtn: '← 뒤로가기',
+                languageLabel: '언어 설정',
+                portLabel: 'Live Server 포트 (0: 자동)',
+                aiKeyLabel: 'Gemini API 키 (AI 자동완성용)',
+                aiModelLabel: 'AI 모델',
+                licenseTitle: '오픈소스 라이선스',
+                uiLayoutTitle: 'UI 레이아웃',
+                verticalTabsLabel: '세로 탭 사용',
+                alarmSettingsTitle: '알람 설정',
+                alarmNotificationLabel: '알람 알림 켜기',
+                alarmTimeLabel: '알람 시간',
+                themePresetsTitle: '테마 프리셋',
+                customizationTitle: '커스터마이징',
+                bgImageLabel: '배경 이미지 URL',
+                primaryTextColorLabel: '주요 텍스트 색상',
+                bgColorLabel: '배경 색상',
+                accentColorLabel: '강조 색상',
+                overlayOpacityLabel: '오버레이 불투명도',
+                customWidgetLabel: '사용자 지정 위젯 HTML',
+                systemAppearanceTitle: '시스템 외관 (재시작 필요)',
+                forceDarkModeLabel: 'WebContents 다크 모드 강제 적용',
+                tabGeneralBtn: '일반',
+                tabThemeBtn: '테마',
+                tabAiBtn: 'AI 설정',
+                tabLicenseBtn: '라이선스'
+            },
+            zh: {
+                settingsTitle: '设置',
+                backBtn: '← 返回',
+                languageLabel: '语言设置',
+                portLabel: 'Live Server 端口 (0为自动)',
+                aiKeyLabel: 'Gemini API 密钥 (用于 AI 自动补全)',
+                aiModelLabel: 'AI 模型',
+                licenseTitle: '开源许可证',
+                uiLayoutTitle: 'UI 布局',
+                verticalTabsLabel: '垂直标签页',
+                alarmSettingsTitle: '闹钟设置',
+                alarmNotificationLabel: '启用闹钟通知',
+                alarmTimeLabel: '闹钟时间',
+                themePresetsTitle: '主题预设',
+                customizationTitle: '自定义',
+                bgImageLabel: '背景图片 URL',
+                primaryTextColorLabel: '主要文本颜色',
+                bgColorLabel: '背景颜色',
+                accentColorLabel: '强调颜色',
+                overlayOpacityLabel: '覆盖层不透明度',
+                customWidgetLabel: '自定义小部件 HTML',
+                systemAppearanceTitle: '系统外观 (需要重启)',
+                forceDarkModeLabel: '强制 WebContents 处于深色模式',
+                tabGeneralBtn: '常规',
+                tabThemeBtn: '主题',
+                tabAiBtn: 'AI 配置',
+                tabLicenseBtn: '许可证'
+            },
+            ar: {
+                settingsTitle: 'الإعدادات',
+                backBtn: '← رجوع',
+                languageLabel: 'إعدادات اللغة',
+                portLabel: 'منفذ Live Server (0 للأساسي)',
+                aiKeyLabel: 'مفتاح واجهة برمجة تطبيقات Gemini (لإكمال AI)',
+                aiModelLabel: 'نموذج AI',
+                licenseTitle: 'تراخيص مفتوحة المصدر',
+                uiLayoutTitle: 'تخطيط واجهة المستخدم',
+                verticalTabsLabel: 'علامات تبويب عمودية',
+                alarmSettingsTitle: 'إعدادات المنبه',
+                alarmNotificationLabel: 'تفعيل إشعار المنبه',
+                alarmTimeLabel: 'وقت المنبه',
+                themePresetsTitle: 'إعدادات السمة المسبقة',
+                customizationTitle: 'التخصيص',
+                bgImageLabel: 'عنوان URL لصورة الخلفية',
+                primaryTextColorLabel: 'لون النص الأساسي',
+                bgColorLabel: 'لون الخلفية',
+                accentColorLabel: 'لون التمييز',
+                overlayOpacityLabel: 'شفافية الغطاء',
+                customWidgetLabel: 'أداة HTML مخصصة',
+                systemAppearanceTitle: 'مظهر النظام (يتطلب إعادة تشغيل)',
+                forceDarkModeLabel: 'فرض الوضع الداكن على WebContents',
+                tabGeneralBtn: 'عام',
+                tabThemeBtn: 'السمة',
+                tabAiBtn: 'تكوين AI',
+                tabLicenseBtn: 'التراخيص'
             }
-        }[lang];
+        }[lang] || {
+            // fallback to English if not found
+            settingsTitle: 'Settings', backBtn: '← Back', languageLabel: 'Language',
+            portLabel: 'Live Server Port (0 for auto)', aiKeyLabel: 'Gemini API Key',
+            aiModelLabel: 'AI Model', licenseTitle: 'Open Source Licenses',
+            uiLayoutTitle: 'UI Layout', verticalTabsLabel: 'Vertical Tabs',
+            alarmSettingsTitle: 'Alarm Settings', alarmNotificationLabel: 'Enable Alarm Notification',
+            alarmTimeLabel: 'Alarm Time', themePresetsTitle: 'Theme Presets',
+            customizationTitle: 'Customization', bgImageLabel: 'Background Image URL',
+            primaryTextColorLabel: 'Primary Text Color', bgColorLabel: 'Background Color',
+            accentColorLabel: 'Accent Color', overlayOpacityLabel: 'Overlay Opacity',
+            customWidgetLabel: 'Custom Widget HTML', systemAppearanceTitle: 'System Appearance (Restart Required)',
+            forceDarkModeLabel: 'Force WebContents Dark Mode', tabGeneralBtn: 'General',
+            tabThemeBtn: 'Theme', tabAiBtn: 'AI Config', tabLicenseBtn: 'Licenses'
+        };
 
         if (!t) return;
 
-        document.getElementById('settings-title').textContent = t.settingsTitle;
-        document.getElementById('back-btn').textContent = t.backBtn;
-        document.getElementById('language-label').textContent = t.languageLabel;
-        document.getElementById('port-label').textContent = t.portLabel;
-        document.getElementById('ai-key-label').textContent = t.aiKeyLabel;
-        document.getElementById('ai-model-label').textContent = t.aiModelLabel;
-        document.getElementById('license-title').textContent = t.licenseTitle;
+        const updateText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        updateText('settings-title', t.settingsTitle);
+        updateText('back-btn', t.backBtn);
+        updateText('language-label', t.languageLabel);
+        updateText('port-label', t.portLabel);
+        updateText('ai-key-label', t.aiKeyLabel);
+        updateText('ai-model-label', t.aiModelLabel);
+        updateText('license-title', t.licenseTitle);
+        updateText('ui-layout-title', t.uiLayoutTitle);
+        updateText('vertical-tabs-label', t.verticalTabsLabel);
+        updateText('alarm-settings-title', t.alarmSettingsTitle);
+        updateText('alarm-notification-label', t.alarmNotificationLabel);
+        updateText('alarm-time-label', t.alarmTimeLabel);
+        updateText('theme-presets-title', t.themePresetsTitle);
+        updateText('customization-title', t.customizationTitle);
+        updateText('bg-image-label', t.bgImageLabel);
+        updateText('primary-text-color-label', t.primaryTextColorLabel);
+        updateText('bg-color-label', t.bgColorLabel);
+        updateText('accent-color-label', t.accentColorLabel);
+        updateText('overlay-opacity-label', t.overlayOpacityLabel);
+        updateText('custom-widget-label', t.customWidgetLabel);
+        updateText('system-appearance-title', t.systemAppearanceTitle);
+        updateText('force-dark-mode-label', t.forceDarkModeLabel);
+        updateText('tab-general-btn', t.tabGeneralBtn);
+        updateText('tab-theme-btn', t.tabThemeBtn);
+        updateText('tab-ai-btn', t.tabAiBtn);
+        updateText('tab-license-btn', t.tabLicenseBtn);
     }
 });

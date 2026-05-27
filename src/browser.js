@@ -62,6 +62,184 @@ document.addEventListener("DOMContentLoaded", () => {
     window.isAiAssistEnabled = true;
     const browserWindowId = Math.random().toString(36).substring(2);
 
+    const lang = localStorage.getItem('appLang') || 'en';
+    const uiText = {
+        ja: {
+            loading: '読み込み中...',
+            history: '履歴',
+            settings: '設定',
+            searchPlaceholder: '検索またはURLを入力',
+            previewOff: 'プレビュー: OFF',
+            previewOn: 'プレビュー: ON',
+            writingDirH: '横書き (標準)',
+            writingDirV: '縦書き',
+            focusOff: '集中モード: OFF',
+            focusOn: '集中モード: ON',
+            saved: '保存済み',
+            unsaved: '未保存',
+            saving: '保存中...',
+            renameTitle: '名前を変更',
+            cancel: 'キャンセル',
+            confirm: '変更',
+            saveBtn: '保存',
+            dontSaveBtn: '保存しない',
+            cancelBtn: 'キャンセル',
+            unsavedTitle: '未保存の変更',
+            unsavedMessage: '未保存の変更があります。続行する前に保存しますか？'
+        },
+        en: {
+            loading: 'Loading...',
+            history: 'History',
+            settings: 'Settings',
+            searchPlaceholder: 'Search or enter URL',
+            previewOff: 'Preview: OFF',
+            previewOn: 'Preview: ON',
+            writingDirH: 'Horizontal',
+            writingDirV: 'Vertical',
+            focusOff: 'Focus Mode: OFF',
+            focusOn: 'Focus Mode: ON',
+            saved: 'Saved',
+            unsaved: 'Unsaved',
+            saving: 'Saving...',
+            renameTitle: 'Rename',
+            cancel: 'Cancel',
+            confirm: 'Confirm',
+            saveBtn: 'Save',
+            dontSaveBtn: 'Don\'t Save',
+            cancelBtn: 'Cancel',
+            unsavedTitle: 'Unsaved Changes',
+            unsavedMessage: 'You have unsaved changes. Do you want to save them before continuing?'
+        },
+        ko: {
+            loading: '로딩 중...',
+            history: '기록',
+            settings: '설정',
+            searchPlaceholder: '검색 또는 URL 입력',
+            previewOff: '미리보기: 끄기',
+            previewOn: '미리보기: 켜기',
+            writingDirH: '가로 쓰기',
+            writingDirV: '세로 쓰기',
+            focusOff: '집중 모드: 끄기',
+            focusOn: '집중 모드: 켜기',
+            saved: '저장됨',
+            unsaved: '저장되지 않음',
+            saving: '저장 중...',
+            renameTitle: '이름 변경',
+            cancel: '취소',
+            confirm: '확인',
+            saveBtn: '저장',
+            dontSaveBtn: '저장 안함',
+            cancelBtn: '취소',
+            unsavedTitle: '저장되지 않은 변경 사항',
+            unsavedMessage: '저장되지 않은 변경 사항이 있습니다. 계속하기 전에 저장하시겠습니까?'
+        },
+        zh: {
+            loading: '加载中...',
+            history: '历史记录',
+            settings: '设置',
+            searchPlaceholder: '搜索或输入 URL',
+            previewOff: '预览: 关闭',
+            previewOn: '预览: 打开',
+            writingDirH: '横向排列',
+            writingDirV: '纵向排列',
+            focusOff: '专注模式: 关闭',
+            focusOn: '专注模式: 打开',
+            saved: '已保存',
+            unsaved: '未保存',
+            saving: '保存中...',
+            renameTitle: '重命名',
+            cancel: '取消',
+            confirm: '确认',
+            saveBtn: '保存',
+            dontSaveBtn: '不保存',
+            cancelBtn: '取消',
+            unsavedTitle: '未保存的更改',
+            unsavedMessage: '您有未保存的更改。在继续之前是否保存？'
+        },
+        ar: {
+            loading: 'جاري التحميل...',
+            history: 'السجل',
+            settings: 'الإعدادات',
+            searchPlaceholder: 'ابحث أو أدخل URL',
+            previewOff: 'معاينة: إيقاف',
+            previewOn: 'معاينة: تشغيل',
+            writingDirH: 'أفقي',
+            writingDirV: 'عمودي',
+            focusOff: 'وضع التركيز: إيقاف',
+            focusOn: 'وضع التركيز: تشغيل',
+            saved: 'تم الحفظ',
+            unsaved: 'غير محفوظ',
+            saving: 'جاري الحفظ...',
+            renameTitle: 'إعادة تسمية',
+            cancel: 'إلغاء',
+            confirm: 'تأكيد',
+            saveBtn: 'حفظ',
+            dontSaveBtn: 'عدم الحفظ',
+            cancelBtn: 'إلغاء',
+            unsavedTitle: 'تغييرات غير محفوظة',
+            unsavedMessage: 'لديك تغييرات غير محفوظة. هل تريد حفظها قبل المتابعة؟',
+            bookmarksTitle: 'العلامات'
+        }
+    };
+    window.t = uiText[lang] || uiText['en'];
+
+    // Update static HTML texts
+    document.getElementById('url-bar').placeholder = window.t.searchPlaceholder;
+    document.querySelector('#rename-modal h3').textContent = window.t.renameTitle;
+    document.getElementById('rename-cancel').textContent = window.t.cancel;
+    document.getElementById('rename-confirm').textContent = window.t.confirm;
+    document.getElementById('toggle-preview-btn').textContent = window.t.previewOff;
+    document.getElementById('toggle-writing-direction-btn').textContent = window.t.writingDirH;
+    document.getElementById('toggle-focus-mode-btn').textContent = window.t.focusOff;
+    document.getElementById('save-status').textContent = window.t.saved;
+
+    const bookmarkStarBtn = document.getElementById("bookmark-star-btn");
+    const bookmarksListBtn = document.getElementById("bookmarks-list-btn");
+    
+    function isBookmarked(url) {
+        if (!url) return false;
+        const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+        return bookmarks.some(b => b.url === url);
+    }
+    
+    function toggleBookmark(url, title) {
+        if (!url) return;
+        let bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+        const idx = bookmarks.findIndex(b => b.url === url);
+        if (idx !== -1) {
+            bookmarks.splice(idx, 1);
+        } else {
+            bookmarks.unshift({ url, title: title || url, timestamp: Date.now() });
+        }
+        localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+        updateBookmarkIcon(url);
+    }
+    
+    function updateBookmarkIcon(url) {
+        if (!url || url.startsWith("trendcreate://") || url.startsWith("file://") || url.includes("home.html") || url.includes("history.html") || url.includes("setting.html") || url.includes("portfolio.html") || url.includes("bookmarks.html")) {
+            bookmarkStarBtn.style.display = "none";
+            return;
+        }
+        bookmarkStarBtn.style.display = "block";
+        const svg = bookmarkStarBtn.querySelector("svg");
+        if (isBookmarked(url)) {
+            svg.setAttribute("fill", "currentColor");
+        } else {
+            svg.setAttribute("fill", "none");
+        }
+    }
+    
+    bookmarkStarBtn.addEventListener("click", () => {
+        const webview = getActiveWebview();
+        if (webview) {
+            toggleBookmark(webview.getURL(), webview.getTitle());
+        }
+    });
+
+    bookmarksListBtn.addEventListener("click", () => {
+        createTab(pathToFileURL(nodePath.join(__dirname, "bookmarks.html")).href);
+    });
+
     const DEFAULT_HTML = `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -457,7 +635,7 @@ ${suffix}`;
     function createTab(url = HOME_URL) {
         tabCounter += 1;
         const tabId = `tab-${tabCounter}`;
-        const tabEl = createTabElement(tabId, "読み込み中...");
+        const tabEl = createTabElement(tabId, window.t.loading);
         const titleEl = tabEl.querySelector(".tab-title");
         const closeBtn = tabEl.querySelector(".tab-close");
 
@@ -749,17 +927,21 @@ ${suffix}`;
             urlBar.placeholder = "TRENDcreate Home";
         } else if (url.includes("history.html")) {
             urlBar.value = "";
-            urlBar.placeholder = "履歴";
+            urlBar.placeholder = window.t.history;
+        } else if (url.includes("bookmarks.html")) {
+            urlBar.value = "";
+            urlBar.placeholder = window.t.bookmarksTitle || "Bookmarks";
         } else if (url.includes("setting.html")) {
             urlBar.value = "";
-            urlBar.placeholder = "設定";
+            urlBar.placeholder = window.t.settings;
         } else if (url.includes("portfolio.html")) {
             urlBar.value = "trendcreate://tcb/portfolio";
             urlBar.placeholder = "Local Projects Portfolio";
         } else {
             urlBar.value = url;
-            urlBar.placeholder = "検索またはURLを入力";
+            urlBar.placeholder = window.t.searchPlaceholder;
         }
+        updateBookmarkIcon(url);
     }
 
     function updateNavState() {
@@ -908,18 +1090,18 @@ ${suffix}`;
     function updateSaveStatus(message) {
         window.__trendHasUnsavedChanges = hasUnsavedChanges;
         activeFileLabel.classList.toggle("unsaved", hasUnsavedChanges);
-        saveStatus.textContent = message || (hasUnsavedChanges ? "Unsaved" : "Saved");
+        saveStatus.textContent = message || (hasUnsavedChanges ? window.t.unsaved : window.t.saved);
     }
 
     async function promptSaveUnsavedChanges() {
         if (!hasUnsavedChanges) return true;
         const result = await ipcRenderer.invoke('show-message-box', {
             type: 'question',
-            buttons: ['Save', "Don't Save", 'Cancel'],
+            buttons: [window.t.saveBtn, window.t.dontSaveBtn, window.t.cancelBtn],
             defaultId: 0,
             cancelId: 2,
-            title: 'Unsaved Changes',
-            message: 'You have unsaved changes. Do you want to save them before continuing?'
+            title: window.t.unsavedTitle,
+            message: window.t.unsavedMessage
         });
 
         if (result.response === 0) {

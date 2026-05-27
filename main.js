@@ -4,7 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const http = require('http');
 
-app.setAppUserModelId('com.trendcreate.browser');
+app.setAppUserModelId('com.trendcreate.browser.v2');
 
 // Config Management
 function getConfigPath() {
@@ -88,9 +88,10 @@ if (!gotTheLock) {
 function createWindow(initialUrl = null) {
   let closeConfirmed = false;
 
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: path.join(__dirname, 'icon.ico'),
     titleBarStyle: 'hidden',
     titleBarOverlay: {
       color: '#000000',
@@ -103,6 +104,8 @@ function createWindow(initialUrl = null) {
       plugins: true
     }
   });
+
+  const win = mainWindow; // Keep win reference for the rest of the function
 
   const template = [
     {

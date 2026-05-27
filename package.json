@@ -1,6 +1,6 @@
 {
   "name": "trendcreate_browser",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -17,6 +17,11 @@
     "electron-builder": "^26.8.1"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/browser": "^8.0.3",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "dompurify": "^3.4.6",
     "monaco-editor": "^0.55.1",
     "pdfjs-dist": "^5.7.284"
   },
@@ -24,7 +29,7 @@
     "electronDownload": {
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
-    "appId": "com.trendcreate.browser",
+    "appId": "com.trendcreate.browser.v2",
     "productName": "TRENDcreate Browser",
     "directories": {
       "output": "dist"
@@ -46,13 +51,15 @@
       "manifest.json",
       "package.json",
       "src/**/*",
-      "node_modules/monaco-editor/**/*"
+      "node_modules/monaco-editor/**/*",
+      "node_modules/dompurify/**/*"
     ],
     "win": {
       "target": [
         "nsis",
         "portable"
-      ]
+      ],
+      "icon": "icon.ico"
     },
     "nsis": {
       "oneClick": false,

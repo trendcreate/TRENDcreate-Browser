@@ -5,7 +5,23 @@
         ipcRenderer = require('electron').ipcRenderer;
         window.ipcRenderer = ipcRenderer;
     }
-    if (!ipcRenderer) return;
+    
+    if (!ipcRenderer) {
+        // We are likely in Capacitor/mobile. Load from localStorage
+        let config = {};
+        try {
+            config = JSON.parse(localStorage.getItem('mobile-config') || '{}');
+        } catch (e) {}
+
+        if (config && config.theme && Object.keys(config.theme).length > 0) {
+            applyTheme(config.theme);
+        } else {
+            applyTheme({ preset: 'aero' }); // Default fallback
+        }
+        
+        window.applyThemeVariables = applyTheme;
+        return;
+    }
 
     try {
         const config = await window.ipcRenderer.invoke('get-config');
@@ -39,32 +55,40 @@
         }
         
         // Background image
-        const bgElement = document.getElementById('background');
-        
-        let finalBgImage = theme.bgImage;
-        if (!finalBgImage) {
-            const timestamp = Date.now();
-            if (theme.preset === 'cyberpunk' || theme.preset === 'aero') {
-                finalBgImage = `https://picsum.photos/1920/1080?random=${timestamp}`;
-            } else {
-                finalBgImage = `https://picsum.photos/1920/1080?grayscale&random=${timestamp}`;
+        const setBg = () => {
+            const bgElement = document.getElementById('background');
+            
+            let finalBgImage = theme.bgImage;
+            if (!finalBgImage) {
+                const timestamp = Date.now();
+                if (theme.preset === 'cyberpunk' || theme.preset === 'aero') {
+                    finalBgImage = `https://picsum.photos/1920/1080?random=${timestamp}`;
+                } else {
+                    finalBgImage = `https://picsum.photos/1920/1080?grayscale&random=${timestamp}`;
+                }
             }
-        }
 
-        if (bgElement && finalBgImage) {
-            if (bgElement.tagName === 'IMG') {
-                bgElement.src = finalBgImage;
-            } else {
-                bgElement.style.backgroundImage = `url('${finalBgImage}')`;
+            if (bgElement && finalBgImage) {
+                if (bgElement.tagName === 'IMG') {
+                    bgElement.src = finalBgImage;
+                } else {
+                    bgElement.style.backgroundImage = `url('${finalBgImage}')`;
+                }
+                bgElement.classList.add('loaded');
+            } else if (bgElement) {
+                if (bgElement.tagName === 'IMG') {
+                    bgElement.src = '';
+                } else {
+                    bgElement.style.backgroundImage = 'none';
+                }
+                bgElement.classList.remove('loaded');
             }
-            bgElement.classList.add('loaded');
-        } else if (bgElement) {
-            if (bgElement.tagName === 'IMG') {
-                bgElement.src = '';
-            } else {
-                bgElement.style.backgroundImage = 'none';
-            }
-            bgElement.classList.remove('loaded');
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setBg);
+        } else {
+            setBg();
         }
     }
 

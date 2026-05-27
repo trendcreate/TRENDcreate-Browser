@@ -3,6 +3,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const openWorkspaceBtn = document.getElementById("open-workspace-btn");
     const goUpBtn = document.getElementById("go-up-btn");
     const currentPathLabel = document.getElementById("current-path-label");
+    const portfolioTitle = document.getElementById("portfolio-title");
+    
+    let currentLang = localStorage.getItem('appLang') || 'en';
+    
+    const uiText = {
+        ja: {
+            title: 'プロジェクトポートフォリオ',
+            changeWorkspace: 'ワークスペース変更',
+            noProjects: 'このワークスペースにはプロジェクトがありません。',
+            failedLoad: 'プロジェクトの読み込みに失敗しました。',
+            defaultWorkspace: 'デフォルト ワークスペース',
+            updated: '更新:'
+        },
+        en: {
+            title: 'Local Projects Portfolio',
+            changeWorkspace: 'Change Workspace',
+            noProjects: 'No projects found in this workspace.',
+            failedLoad: 'Failed to load projects.',
+            defaultWorkspace: 'Default Workspace',
+            updated: 'Updated:'
+        },
+        ko: {
+            title: '로컬 프로젝트 포트폴리오',
+            changeWorkspace: '작업 공간 변경',
+            noProjects: '이 작업 공간에 프로젝트가 없습니다.',
+            failedLoad: '프로젝트를 불러오지 못했습니다.',
+            defaultWorkspace: '기본 작업 공간',
+            updated: '업데이트됨:'
+        },
+        zh: {
+            title: '本地项目组合',
+            changeWorkspace: '更改工作区',
+            noProjects: '此工作区中未找到项目。',
+            failedLoad: '加载项目失败。',
+            defaultWorkspace: '默认工作区',
+            updated: '已更新:'
+        },
+        ar: {
+            title: 'محفظة المشاريع المحلية',
+            changeWorkspace: 'تغيير مساحة العمل',
+            noProjects: 'لم يتم العثور على مشاريع في مساحة العمل هذه.',
+            failedLoad: 'فشل في تحميل المشاريع.',
+            defaultWorkspace: 'مساحة العمل الافتراضية',
+            updated: 'تم التحديث:'
+        }
+    };
+    const t = uiText[currentLang] || uiText['en'];
+
+    if (portfolioTitle) portfolioTitle.textContent = t.title;
+    if (openWorkspaceBtn) openWorkspaceBtn.textContent = t.changeWorkspace;
     
     let baseWorkspacePath = localStorage.getItem('trendcreate-portfolio-workspace') || null;
     let currentPath = baseWorkspacePath;
@@ -13,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Update state
             currentPath = targetPath;
-            currentPathLabel.textContent = currentPath || "Default Workspace";
+            currentPathLabel.textContent = currentPath || t.defaultWorkspace;
             
             // Enable/disable Go Up
             if (baseWorkspacePath && currentPath && currentPath.length > baseWorkspacePath.length) {
@@ -25,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             portfolioGrid.innerHTML = '';
             
             if (!projects || projects.length === 0) {
-                portfolioGrid.innerHTML = '<p style="color:#aaa; text-align:center; grid-column: 1 / -1; font-size: 1.2rem; margin-top: 50px;">No projects found in this workspace.</p>';
+                portfolioGrid.innerHTML = `<p style="color:#aaa; text-align:center; grid-column: 1 / -1; font-size: 1.2rem; margin-top: 50px;">${t.noProjects}</p>`;
                 return;
             }
 
@@ -67,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${previewHtml}
                     <div class="portfolio-card-title" title="${project.title}">${project.title}</div>
                     <div class="portfolio-card-subtitle" title="${project.name}">${project.name}</div>
-                    <div class="portfolio-card-date">Updated: ${date}</div>
+                    <div class="portfolio-card-date">${t.updated} ${date}</div>
                 `;
 
                 card.addEventListener("click", () => {
@@ -84,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (e) {
             console.error("Failed to load portfolio", e);
-            portfolioGrid.innerHTML = '<p style="color:red; text-align:center; grid-column: 1 / -1;">Failed to load projects.</p>';
+            portfolioGrid.innerHTML = `<p style="color:red; text-align:center; grid-column: 1 / -1;">${t.failedLoad}</p>`;
         }
     }
 

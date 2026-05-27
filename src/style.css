@@ -248,10 +248,15 @@ input[type="range"] {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(12px);
     border: 2px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
     width: 40%;
     height: 25vh;
+    min-width: 300px;
+    min-height: 200px;
+    max-width: 90vw;
+    max-height: 80vh;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    resize: both;
 }
 
 .audio-section.dragover {
@@ -408,6 +413,13 @@ input[type="range"] {
     z-index: -1;
     pointer-events: none;
     opacity: 0.8;
+}
+
+#custom-widget-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 /* Modals */
