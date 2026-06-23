@@ -4,6 +4,12 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.compose'
 }
 
+def keystorePropsFile = rootProject.file("keystore.properties")
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
 android {
     namespace 'com.trendcreate.browser'
     compileSdk 36
@@ -12,13 +18,34 @@ android {
         applicationId "com.trendcreate.browser"
         minSdk 26
         targetSdk 36
-        versionCode 1
-        versionName "0.1.0"
+        versionCode 26062301
+        versionName "Android-26.6.23.01"
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropsFile.exists()) {
+                storeFile rootProject.file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+            universalApk false
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig keystorePropsFile.exists() ? signingConfigs.release : signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

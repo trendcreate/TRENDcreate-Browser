@@ -6,6 +6,9 @@ app/build/
 # Local config (machine-specific SDK path)
 local.properties
 
+# Verification screenshots
+device-*.png
+
 # IDE
 .idea/
 *.iml
@@ -14,3 +17,4 @@ local.properties
 # Keystore / signing (never commit)
 *.jks
 *.keystore
+keystore.properties
