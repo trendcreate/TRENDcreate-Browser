@@ -7,6 +7,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,7 +54,14 @@ fun BrowserScreen(vm: BrowserViewModel = viewModel()) {
 
     BackHandler(enabled = active?.canGoBack == true) { vm.back() }
 
-    Column(Modifier.fillMaxSize().background(BgColor)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(BgColor)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
+    ) {
         TabStrip(vm)
         NavBar(vm)
         if (vm.findVisible) FindBar(vm)
