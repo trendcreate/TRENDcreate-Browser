@@ -1,0 +1,16 @@
+# Build outputs
+build/
+app/build/
+.gradle/
+
+# Local config (machine-specific SDK path)
+local.properties
+
+# IDE
+.idea/
+*.iml
+.cxx/
+
+# Keystore / signing (never commit)
+*.jks
+*.keystore

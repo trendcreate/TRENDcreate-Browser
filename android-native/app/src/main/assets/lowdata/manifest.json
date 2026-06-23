@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "name": "TRENDcreate Low Data",
+  "version": "1.0",
+  "description": "低速回線モード: 画像・動画・フォント・サードパーティJSを遮断し、HTMLと最低限のJavaScriptのみ読み込みます。",
+  "applications": {
+    "gecko": {
+      "id": "lowdata@trendcreate.browser"
+    }
+  },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["block.js"]
+  }
+}
