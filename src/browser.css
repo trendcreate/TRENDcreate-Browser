@@ -770,3 +770,85 @@ body.dragging-tab webview {
     width: 0%;
     transition: width 0.2s;
 }
+
+/* ==========================================
+   Find in page bar
+   ========================================== */
+#find-bar {
+    position: absolute;
+    top: 84px;
+    right: 16px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    background: #2b2b2b;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+#find-bar.hidden { display: none; }
+#find-input {
+    background: #1e1e1e;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    color: #e8eaed;
+    padding: 4px 8px;
+    width: 200px;
+    outline: none;
+    font-size: 13px;
+}
+#find-count {
+    color: #9aa0a6;
+    font-size: 12px;
+    min-width: 38px;
+    text-align: center;
+}
+.find-btn {
+    background: transparent;
+    border: none;
+    color: #c8c8c8;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+.find-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* ==========================================
+   Profile menu
+   ========================================== */
+#profile-btn { display: flex; align-items: center; }
+#profile-menu {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    z-index: 1001;
+    min-width: 180px;
+    background: #2b2b2b;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+}
+#profile-menu.hidden { display: none; }
+.profile-menu-item {
+    background: transparent;
+    border: none;
+    color: #e8eaed;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.profile-menu-item:hover { background: rgba(255, 255, 255, 0.08); }
+.profile-menu-item.active { color: #8ab4f8; font-weight: bold; }
+.profile-menu-item.profile-add {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 4px;
+    color: #8ab4f8;
+}

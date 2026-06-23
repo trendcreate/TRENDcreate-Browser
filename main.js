@@ -67,6 +67,59 @@ function savePasswords(passwords) {
 
 let mainWindow = null;
 const activeDownloads = new Set();
+const preparedPartitions = new Set();
+
+// Apply Chrome-equivalent request headers and download tracking to a session.
+// Used for the default session and every per-profile partition session.
+function setupSession(sess) {
+  if (!sess) return;
+  sess.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders['User-Agent'] = app.userAgentFallback;
+    details.requestHeaders['sec-ch-ua'] = '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"';
+    details.requestHeaders['sec-ch-ua-mobile'] = '?0';
+    details.requestHeaders['sec-ch-ua-platform'] = '"Windows"';
+    callback({ requestHeaders: details.requestHeaders });
+  });
+
+  sess.on('will-download', (event, item, webContents) => {
+    activeDownloads.add(item);
+    const targetWin = BrowserWindow.fromWebContents(webContents) || mainWindow;
+    if (targetWin) {
+      const fileName = item.getFilename();
+      const totalBytes = item.getTotalBytes();
+
+      item.on('updated', (event, state) => {
+        if (state === 'interrupted') {
+          console.log('Download is interrupted but can be resumed');
+        } else if (state === 'progressing') {
+          if (item.isPaused()) {
+            console.log('Download is paused');
+          } else {
+            if (!targetWin.isDestroyed() && !targetWin.webContents.isDestroyed()) {
+              targetWin.webContents.send('download-progress', {
+                filename: fileName,
+                received: item.getReceivedBytes(),
+                total: totalBytes
+              });
+            }
+          }
+        }
+      });
+
+      item.once('done', (event, state) => {
+        activeDownloads.delete(item);
+        if (!targetWin.isDestroyed() && !targetWin.webContents.isDestroyed()) {
+          targetWin.webContents.send('download-done', {
+            filename: fileName,
+            state: state
+          });
+        }
+      });
+    } else {
+      item.once('done', () => activeDownloads.delete(item));
+    }
+  });
+}
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -217,6 +270,14 @@ function createWindow(initialUrl = null) {
       return;
     }
 
+    if (input.control && !input.shift && !input.alt && input.key.toLowerCase() === 'f') {
+      if (!win.isDestroyed()) {
+        win.webContents.send('browser-find-command');
+      }
+      event.preventDefault();
+      return;
+    }
+
     if (
       input.key === 'BrowserBack' ||
       input.key === 'MouseBack' ||
@@ -267,6 +328,12 @@ function createWindow(initialUrl = null) {
       if (data && data.url) {
         createWindow(data.url);
       }
+    });
+
+    ipcMain.handle('prepare-session-partition', (event, partition) => {
+      if (!partition || preparedPartitions.has(partition)) return;
+      preparedPartitions.add(partition);
+      setupSession(session.fromPartition(partition));
     });
 
     ipcMain.handle('get-config', () => loadConfig());
@@ -553,6 +620,35 @@ function createWindow(initialUrl = null) {
     currentPreviewContent[pathname] = content;
   });
 
+  ipcMain.handle('show-webview-context-menu', (event, params = {}) => {
+    return new Promise((resolve) => {
+      let settled = false;
+      const done = (action) => { if (!settled) { settled = true; resolve(action); } };
+      const tpl = [
+        { label: '戻る', enabled: !!params.canGoBack, click: () => done('back') },
+        { label: '進む', enabled: !!params.canGoForward, click: () => done('forward') },
+        { label: '再読み込み', click: () => done('reload') },
+        { type: 'separator' }
+      ];
+      if (params.linkURL) {
+        tpl.push({ label: 'リンクを新しいタブで開く', click: () => done('openLink') });
+        tpl.push({ label: 'リンクのアドレスをコピー', click: () => done('copyLink') });
+        tpl.push({ type: 'separator' });
+      }
+      if (params.selectionText) {
+        tpl.push({ label: 'コピー', click: () => done('copy') });
+        tpl.push({ label: '選択範囲を翻訳', click: () => done('translateSelection') });
+        tpl.push({ type: 'separator' });
+      }
+      tpl.push({ label: 'このページを日本語に翻訳', click: () => done('translatePage') });
+      tpl.push({ type: 'separator' });
+      tpl.push({ label: '検証 (DevTools)', click: () => done('inspect') });
+
+      const menu = Menu.buildFromTemplate(tpl);
+      menu.popup({ window: BrowserWindow.fromWebContents(event.sender), callback: () => done(null) });
+    });
+  });
+
   ipcMain.handle('show-context-menu', (event) => {
     const template = [
       { role: 'undo', label: 'Undo' },
@@ -726,56 +822,8 @@ app.whenReady().then(async () => {
     console.log('Components ready:', components.status());
   }
 
-  // Setup default session for Twitter login and downloads
-  const defaultSession = session.defaultSession;
-  defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    details.requestHeaders['User-Agent'] = app.userAgentFallback;
-    details.requestHeaders['sec-ch-ua'] = '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"';
-    details.requestHeaders['sec-ch-ua-mobile'] = '?0';
-    details.requestHeaders['sec-ch-ua-platform'] = '"Windows"';
-    callback({ requestHeaders: details.requestHeaders });
-  });
-
-  defaultSession.on('will-download', (event, item, webContents) => {
-    activeDownloads.add(item);
-    
-    // Send event to main window
-    const targetWin = BrowserWindow.fromWebContents(webContents) || mainWindow;
-    if (targetWin) {
-      const fileName = item.getFilename();
-      const totalBytes = item.getTotalBytes();
-      
-      item.on('updated', (event, state) => {
-        if (state === 'interrupted') {
-          console.log('Download is interrupted but can be resumed');
-        } else if (state === 'progressing') {
-          if (item.isPaused()) {
-            console.log('Download is paused');
-          } else {
-            if (!targetWin.isDestroyed() && !targetWin.webContents.isDestroyed()) {
-              targetWin.webContents.send('download-progress', {
-                filename: fileName,
-                received: item.getReceivedBytes(),
-                total: totalBytes
-              });
-            }
-          }
-        }
-      });
-      
-      item.once('done', (event, state) => {
-        activeDownloads.delete(item);
-        if (!targetWin.isDestroyed() && !targetWin.webContents.isDestroyed()) {
-          targetWin.webContents.send('download-done', {
-            filename: fileName,
-            state: state
-          });
-        }
-      });
-    } else {
-      item.once('done', () => activeDownloads.delete(item));
-    }
-  });
+  // Setup default session (used by internal app pages) for login and downloads.
+  setupSession(session.defaultSession);
 
   createWindow();
 

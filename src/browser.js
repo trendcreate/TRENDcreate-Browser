@@ -58,6 +58,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const HOME_URL = "home.html";
 
+    const { clipboard } = window.nodeRequire("electron");
+
+    // Application config (theme/profiles/etc). Populated from the main process
+    // before the first tab is created.
+    let appConfig = {};
+
+    // Profile separation: real web content is loaded into a per-profile session
+    // partition so cookies/logins/storage are isolated. Internal app pages keep
+    // using the shared default session so history/bookmarks stay unified.
+    let activeProfile = "default";
+    const INTERNAL_PAGES = [
+        "home.html", "history.html", "bookmarks.html", "setting.html",
+        "portfolio.html", "notepad.html", "pdf-viewer.html", "index.html"
+    ];
+    function isInternalPage(url) {
+        if (!url) return true;
+        return INTERNAL_PAGES.some((p) => url.includes(p));
+    }
+    function getPartitionForUrl(url) {
+        if (isInternalPage(url)) return null; // shared default session
+        return `persist:profile-${activeProfile}`;
+    }
+
     window.isWritingMode = false;
     window.isAiAssistEnabled = true;
     const browserWindowId = Math.random().toString(36).substring(2);
@@ -649,13 +672,20 @@ ${suffix}`;
 
         const webviewEl = document.createElement("webview");
         webviewEl.id = `webview-${tabId}`;
-        webviewEl.src = url;
+        // Partition must be set before navigation so the right session is used.
+        const partition = getPartitionForUrl(url);
+        if (partition) {
+            ipcRenderer.invoke("prepare-session-partition", partition);
+            webviewEl.setAttribute("partition", partition);
+        }
         webviewEl.setAttribute("preload", "file://" + nodePath.join(__dirname, "preload.js"));
         webviewEl.setAttribute("allowpopups", "allowpopups");
+        webviewEl.setAttribute("plugins", "true"); // enable native Chromium PDF viewer
+        webviewEl.src = url;
         webviewEl.className = "webview-hidden";
         webviewsContainer.appendChild(webviewEl);
 
-        const tabData = { type: "browser", id: tabId, tabEl, webviewEl, titleEl, currentUrl: url };
+        const tabData = { type: "browser", id: tabId, tabEl, webviewEl, titleEl, currentUrl: url, profile: partition ? activeProfile : null };
         tabs.push(tabData);
 
         tabEl.addEventListener("click", (event) => {
@@ -743,9 +773,41 @@ ${suffix}`;
                 console.error("Failed to inject dark theme CSS:", err);
             }
         });
-        webviewEl.addEventListener("context-menu", (e) => {
+        webviewEl.addEventListener("context-menu", async (e) => {
             e.preventDefault();
-            ipcRenderer.invoke("show-context-menu");
+            const params = e.params || {};
+            const selectionText = (params.selectionText || "").trim();
+            const linkURL = params.linkURL || "";
+            const action = await ipcRenderer.invoke("show-webview-context-menu", {
+                selectionText,
+                linkURL,
+                canGoBack: webviewEl.canGoBack(),
+                canGoForward: webviewEl.canGoForward()
+            });
+            if (!action) return;
+            switch (action) {
+                case "back": if (webviewEl.canGoBack()) webviewEl.goBack(); break;
+                case "forward": if (webviewEl.canGoForward()) webviewEl.goForward(); break;
+                case "reload": webviewEl.reload(); break;
+                case "copy": webviewEl.copy(); break;
+                case "copyLink": clipboard.writeText(linkURL); break;
+                case "openLink": if (linkURL) createTab(linkURL); break;
+                case "translateSelection":
+                    if (selectionText) {
+                        createTab(`https://translate.google.com/?sl=auto&tl=ja&text=${encodeURIComponent(selectionText)}&op=translate`);
+                    }
+                    break;
+                case "translatePage":
+                    createTab(`https://translate.google.com/translate?sl=auto&tl=ja&u=${encodeURIComponent(webviewEl.getURL())}`);
+                    break;
+                case "inspect":
+                    ipcRenderer.invoke("open-webview-devtools", webviewEl.getWebContentsId());
+                    break;
+            }
+        });
+        webviewEl.addEventListener("found-in-page", (e) => {
+            if (activeTabId !== tabId) return;
+            updateFindCount(e.result);
         });
         webviewEl.addEventListener("ipc-message", async (event) => {
             if (event.channel === "webview-mousedown") {
@@ -1786,13 +1848,175 @@ ${suffix}`;
 
     window.__trendHasUnsavedChanges = false;
     setupColumnResizers();
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialUrl = urlParams.get('url');
-    if (initialUrl) {
-        createTab(initialUrl);
-    } else {
-        createTab();
+
+    // ==========================================
+    // Find in page
+    // ==========================================
+    const findBar = document.getElementById("find-bar");
+    const findInput = document.getElementById("find-input");
+    const findCount = document.getElementById("find-count");
+    const findPrevBtn = document.getElementById("find-prev");
+    const findNextBtn = document.getElementById("find-next");
+    const findCloseBtn = document.getElementById("find-close");
+    let findActiveText = "";
+
+    function updateFindCount(result) {
+        if (!findCount || !result) return;
+        if (result.matches > 0) {
+            findCount.textContent = `${result.activeMatchOrdinal}/${result.matches}`;
+        } else {
+            findCount.textContent = findActiveText ? "0/0" : "";
+        }
     }
+    function doFind(forward = true, findNext = false) {
+        const webview = getActiveWebview();
+        if (!webview) return;
+        const text = findInput.value;
+        findActiveText = text;
+        if (!text) {
+            webview.stopFindInPage("clearSelection");
+            if (findCount) findCount.textContent = "";
+            return;
+        }
+        webview.findInPage(text, { forward, findNext });
+    }
+    function openFindBar() {
+        if (!findBar) return;
+        findBar.classList.remove("hidden");
+        findInput.focus();
+        findInput.select();
+        if (findInput.value) doFind(true, false);
+    }
+    function closeFindBar() {
+        if (!findBar) return;
+        findBar.classList.add("hidden");
+        const webview = getActiveWebview();
+        if (webview) webview.stopFindInPage("clearSelection");
+        findActiveText = "";
+        if (findCount) findCount.textContent = "";
+    }
+    if (findInput) {
+        findInput.addEventListener("input", () => doFind(true, false));
+        findInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); doFind(!e.shiftKey, true); }
+            else if (e.key === "Escape") { e.preventDefault(); closeFindBar(); }
+        });
+        findNextBtn.addEventListener("click", () => doFind(true, true));
+        findPrevBtn.addEventListener("click", () => doFind(false, true));
+        findCloseBtn.addEventListener("click", closeFindBar);
+    }
+    ipcRenderer.on("browser-find-command", openFindBar);
+    document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f" && !e.shiftKey) {
+            // Only when a browsing tab is active (let IDE/Monaco handle its own find)
+            if (getActiveWebview()) { e.preventDefault(); openFindBar(); }
+        }
+    });
+
+    // ==========================================
+    // Profiles
+    // ==========================================
+    const profileBtn = document.getElementById("profile-btn");
+    const profileNameEl = document.getElementById("profile-name");
+    const profileMenu = document.getElementById("profile-menu");
+
+    function renderProfileUI() {
+        if (!profileBtn || !profileMenu) return;
+        const current = appConfig.profiles.find((p) => p.id === activeProfile) || appConfig.profiles[0];
+        if (profileNameEl) profileNameEl.textContent = current ? current.name : "Default";
+        profileMenu.replaceChildren();
+        appConfig.profiles.forEach((p) => {
+            const item = document.createElement("button");
+            item.className = "profile-menu-item" + (p.id === activeProfile ? " active" : "");
+            item.textContent = p.name;
+            item.addEventListener("click", () => { switchProfile(p.id); profileMenu.classList.add("hidden"); });
+            profileMenu.appendChild(item);
+        });
+        const addBtn = document.createElement("button");
+        addBtn.className = "profile-menu-item profile-add";
+        addBtn.textContent = "+ 新しいプロファイル";
+        addBtn.addEventListener("click", addProfile);
+        profileMenu.appendChild(addBtn);
+    }
+    async function persistProfiles() {
+        appConfig.activeProfile = activeProfile;
+        try { await ipcRenderer.invoke('save-config', appConfig); } catch (e) {}
+    }
+    function switchProfile(id) {
+        if (id === activeProfile) return;
+        activeProfile = id;
+        persistProfiles();
+        renderProfileUI();
+        createTab(); // open a fresh tab in the newly selected profile
+    }
+    function showPrompt(title, defaultValue = "") {
+        return new Promise((resolve) => {
+            const modal = document.getElementById("prompt-modal");
+            const input = document.getElementById("prompt-modal-input");
+            const titleEl = document.getElementById("prompt-modal-title");
+            const okBtn = document.getElementById("prompt-modal-confirm");
+            const cancelBtn = document.getElementById("prompt-modal-cancel");
+            if (!modal) { resolve(null); return; }
+            titleEl.textContent = title;
+            input.value = defaultValue;
+            modal.classList.remove("hidden");
+            input.focus();
+            input.select();
+            const cleanup = () => {
+                modal.classList.add("hidden");
+                okBtn.removeEventListener("click", onOk);
+                cancelBtn.removeEventListener("click", onCancel);
+                input.removeEventListener("keydown", onKey);
+            };
+            const onOk = () => { const v = input.value.trim(); cleanup(); resolve(v || null); };
+            const onCancel = () => { cleanup(); resolve(null); };
+            const onKey = (e) => {
+                if (e.key === "Enter") { e.preventDefault(); onOk(); }
+                else if (e.key === "Escape") { e.preventDefault(); onCancel(); }
+            };
+            okBtn.addEventListener("click", onOk);
+            cancelBtn.addEventListener("click", onCancel);
+            input.addEventListener("keydown", onKey);
+        });
+    }
+    async function addProfile() {
+        const name = (await showPrompt("新しいプロファイル名を入力してください") || "").trim();
+        if (!name) return;
+        const id = `${Date.now().toString(36)}`;
+        appConfig.profiles.push({ id, name });
+        await persistProfiles();
+        switchProfile(id);
+        renderProfileUI();
+    }
+    if (profileBtn) {
+        profileBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            profileMenu.classList.toggle("hidden");
+        });
+        document.addEventListener("click", () => profileMenu && profileMenu.classList.add("hidden"));
+    }
+
+    async function bootstrap() {
+        try {
+            appConfig = await ipcRenderer.invoke('get-config') || {};
+        } catch (e) {
+            appConfig = {};
+        }
+        if (!Array.isArray(appConfig.profiles) || appConfig.profiles.length === 0) {
+            appConfig.profiles = [{ id: 'default', name: 'Default' }];
+        }
+        activeProfile = appConfig.activeProfile || appConfig.profiles[0].id;
+        renderProfileUI();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialUrl = urlParams.get('url');
+        if (initialUrl) {
+            createTab(initialUrl);
+        } else {
+            createTab();
+        }
+    }
+    bootstrap();
 
     // ==========================================
     // Writing Mode (Focus Mode) Logic
