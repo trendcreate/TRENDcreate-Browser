@@ -102,7 +102,26 @@
                         d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                     </path>
                 </svg></button>
+            <div id="profile-container" style="position:relative;">
+                <button id="profile-btn" class="nav-btn" title="Profiles">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span id="profile-name" style="margin-left:4px; font-size:12px; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Default</span>
+                </button>
+                <div id="profile-menu" class="hidden"></div>
+            </div>
         </div>
+    </div>
+
+    <!-- Find in page bar -->
+    <div id="find-bar" class="hidden">
+        <input type="text" id="find-input" placeholder="ページ内を検索" autocomplete="off">
+        <span id="find-count"></span>
+        <button id="find-prev" class="find-btn" title="前へ">▲</button>
+        <button id="find-next" class="find-btn" title="次へ">▼</button>
+        <button id="find-close" class="find-btn" title="閉じる">✕</button>
     </div>
 
     <!-- Mobile Hamburger Menu Overlay -->
@@ -230,6 +249,21 @@
                     style="padding: 6px 12px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #eee;">キャンセル</button>
                 <button id="rename-confirm"
                     style="padding: 6px 12px; cursor: pointer; border: 1px solid #007acc; border-radius: 4px; background: #007acc; color: white;">変更</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Prompt Modal -->
+    <div id="prompt-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="prompt-modal-title" style="margin-top: 0;">入力</h3>
+            <input type="text" id="prompt-modal-input"
+                style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; color: #000;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button id="prompt-modal-cancel"
+                    style="padding: 6px 12px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #eee;">キャンセル</button>
+                <button id="prompt-modal-confirm"
+                    style="padding: 6px 12px; cursor: pointer; border: 1px solid #007acc; border-radius: 4px; background: #007acc; color: white;">OK</button>
             </div>
         </div>
     </div>
