@@ -63,17 +63,13 @@ nav{display:flex;align-items:center;justify-content:space-between;height:64px}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 .hero .meta{margin-top:18px;font-size:13px;color:var(--muted)}
 
-/* window mock */
-.mock{max-width:880px;margin:64px auto 0;border:1px solid var(--border);border-radius:14px;
-  overflow:hidden;background:var(--bg2);box-shadow:0 30px 80px rgba(0,0,0,.5)}
-.mock .bar{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#000;border-bottom:1px solid var(--border)}
-.mock .bar .c{width:12px;height:12px;border-radius:50%}
-.mock .bar .c.r{background:#ff5f57}.mock .bar .c.y{background:#febc2e}.mock .bar .c.g{background:#28c840}
-.mock .bar .url{flex:1;margin-left:14px;height:28px;border-radius:8px;background:var(--card);
-  display:flex;align-items:center;padding:0 12px;color:var(--muted);font-size:12px}
-.mock .body{padding:42px 28px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.mock .body .tile{height:74px;border-radius:10px;border:1px solid var(--border);
-  background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+/* screenshot frame */
+.shot{max-width:960px;margin:64px auto 0;border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;background:var(--bg2);box-shadow:0 30px 80px rgba(0,0,0,.55);line-height:0}
+.shot img{width:100%;height:auto;display:block}
+.shot-caption{text-align:center;color:var(--muted);font-size:13px;margin-top:14px;line-height:1.6}
+.showcase{max-width:880px;margin:0 auto}
+.showcase .shot{margin-top:0}
 
 /* sections */
 section{padding:84px 0}
@@ -135,15 +131,8 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
       </div>
       <div class="meta">Windows 10 / 11 対応 ・ 無料 ・ オープンソース (MIT)</div>
 
-      <div class="mock" aria-hidden="true">
-        <div class="bar">
-          <span class="c r"></span><span class="c y"></span><span class="c g"></span>
-          <span class="url">https://trendcreate.app</span>
-        </div>
-        <div class="body">
-          <span class="tile"></span><span class="tile"></span><span class="tile"></span>
-          <span class="tile"></span><span class="tile"></span><span class="tile"></span>
-        </div>
+      <div class="shot">
+        <img src="assets/home.png" alt="TRENDcreate Browser のホーム画面" loading="lazy">
       </div>
     </div>
   </section>
@@ -189,6 +178,20 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
     </div>
   </section>
 
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="section-title">
+        <h2>ブラウザの中に、開発環境を。</h2>
+        <p>Monaco エディタ搭載の内蔵 IDE とライブプレビューで、見ながら作れる。</p>
+      </div>
+      <div class="showcase">
+        <div class="shot">
+          <img src="assets/ide.png" alt="TRENDcreate Browser の内蔵 IDE 画面" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="lightweight">
     <div class="wrap">
       <div class="callout">
@@ -197,8 +200,8 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
           重量級のエディタは「使う瞬間まで読み込まない」遅延ロード方式に。配布パッケージも必要なファイルだけに絞り込み、起動とインストールを高速化しました。
         </p>
         <div class="stats">
-          <div class="stat"><div class="num">~50MB↓</div><div class="lbl">インストールサイズ削減</div></div>
-          <div class="stat"><div class="num">起動高速化</div><div class="lbl">エディタの遅延ロード</div></div>
+          <div class="stat"><div class="num">起動を高速化</div><div class="lbl">エディタの遅延ロード</div></div>
+          <div class="stat"><div class="num">同梱を最適化</div><div class="lbl">不要ファイルを削減</div></div>
           <div class="stat"><div class="num">MIT</div><div class="lbl">オープンソース</div></div>
         </div>
       </div>
