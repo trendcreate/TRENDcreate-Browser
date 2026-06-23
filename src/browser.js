@@ -270,6 +270,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let suggestionTimer = null;
     let currentSuggestionIndex = -1;
 
+    // Monaco is lazily initialized the first time the IDE is opened, so the
+    // browser shell can start without paying the cost of loading the editor.
+    let monacoInitStarted = false;
+    function initMonaco() {
+        if (monacoInitStarted) return;
+        monacoInitStarted = true;
+
     const monacoBase = new URL("../node_modules/monaco-editor/min/", window.location.href).href;
     window.MonacoEnvironment = {
         getWorkerUrl() {
@@ -631,6 +638,7 @@ ${suffix}`;
 
         updatePreview();
     });
+    } // end initMonaco
 
     function createTab(url = HOME_URL) {
         tabCounter += 1;
@@ -778,6 +786,7 @@ ${suffix}`;
     }
 
     function createIdeTab() {
+        initMonaco();
         if (ideTabId) {
             activateTab(ideTabId);
             return;
