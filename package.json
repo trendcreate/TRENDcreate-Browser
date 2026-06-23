@@ -21,7 +21,7 @@
     "@capacitor/browser": "^8.0.3",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
-    "dompurify": "^3.4.6",
+    "dompurify": "^3.4.11",
     "monaco-editor": "^0.55.1",
     "pdfjs-dist": "^5.7.284"
   },
