@@ -29,8 +29,8 @@ enum class LowData { OFF, AUTO, ON }
 /** Below this estimated downstream bandwidth the link is treated as slow. */
 private const val SLOW_THRESHOLD_KBPS = 1500
 
-/** Default page shown for a fresh tab. */
-const val HOME_URL = "https://www.google.com/"
+/** Sentinel for a fresh tab that shows the native home screen (no web load). */
+const val HOME_URL = "trendcreate:home"
 
 /** Holds the single process-wide GeckoRuntime. */
 object Engine {
@@ -53,6 +53,7 @@ class Tab(
     var canGoBack by mutableStateOf(false)
     var canGoForward by mutableStateOf(false)
     var loading by mutableStateOf(false)
+    var isHome by mutableStateOf(false)
 }
 
 class BrowserViewModel(app: Application) : AndroidViewModel(app) {
@@ -219,9 +220,11 @@ class BrowserViewModel(app: Application) : AndroidViewModel(app) {
             .build()
         val session = GeckoSession(settings)
         session.open(runtime)
-        val tab = Tab(nextId++, session, initialUrl)
+        val home = initialUrl == HOME_URL
+        val tab = Tab(nextId++, session, if (home) "" else initialUrl)
+        tab.isHome = home
         wireDelegates(tab)
-        session.loadUri(initialUrl)
+        if (!home) session.loadUri(initialUrl)
         tabs.add(tab)
         activeIndex = tabs.lastIndex
     }
@@ -242,7 +245,18 @@ class BrowserViewModel(app: Application) : AndroidViewModel(app) {
     /** Opens a URL, either in a new tab or by replacing the active tab. */
     fun openUrl(url: String, inNewTab: Boolean = true) {
         val tab = activeTab
-        if (inNewTab || tab == null) newTab(url) else tab.session.loadUri(url)
+        if (inNewTab || tab == null) newTab(url)
+        else { tab.isHome = false; tab.session.loadUri(url) }
+    }
+
+    /** AI search shortcut (Google AI mode) from the home screen. */
+    fun searchAi(query: String) {
+        val tab = activeTab ?: return
+        val q = query.trim()
+        if (q.isEmpty()) return
+        tab.isHome = false
+        tab.session.loadUri("https://www.google.com/search?udm=50&q=" +
+                java.net.URLEncoder.encode(q, "UTF-8"))
     }
 
     fun loadUrlOrSearch(input: String) {
@@ -254,6 +268,7 @@ class BrowserViewModel(app: Application) : AndroidViewModel(app) {
             trimmed.contains(".") && !trimmed.contains(" ") -> "https://$trimmed"
             else -> "https://www.google.com/search?q=" + java.net.URLEncoder.encode(trimmed, "UTF-8")
         }
+        tab.isHome = false
         tab.session.loadUri(url)
     }
 
@@ -287,7 +302,12 @@ class BrowserViewModel(app: Application) : AndroidViewModel(app) {
                 session: GeckoSession, url: String?,
                 perms: MutableList<GeckoSession.PermissionDelegate.ContentPermission>,
                 hasUserGesture: Boolean
-            ) { if (url != null) tab.url = url }
+            ) {
+                if (url != null) {
+                    tab.url = url
+                    if (url.startsWith("http")) tab.isHome = false
+                }
+            }
 
             override fun onCanGoBack(session: GeckoSession, canGoBack: Boolean) { tab.canGoBack = canGoBack }
             override fun onCanGoForward(session: GeckoSession, canGoForward: Boolean) { tab.canGoForward = canGoForward }

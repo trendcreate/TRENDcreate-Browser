@@ -97,7 +97,15 @@ fun BrowserScreen(pendingUrl: MutableState<String?>, vm: BrowserViewModel = view
                     modifier = Modifier.fillMaxWidth().height(2.dp)
                 )
             }
-            GeckoHost(vm, Modifier.weight(1f).fillMaxWidth())
+            if (active != null && active.isHome) {
+                HomeScreen(
+                    onSearch = { vm.loadUrlOrSearch(it) },
+                    onAiSearch = { vm.searchAi(it) },
+                    modifier = Modifier.weight(1f).fillMaxWidth()
+                )
+            } else {
+                GeckoHost(vm, Modifier.weight(1f).fillMaxWidth())
+            }
         }
 
         when (overlay) {
@@ -160,7 +168,9 @@ private fun TabStrip(vm: BrowserViewModel) {
 @Composable
 private fun NavBar(vm: BrowserViewModel, onOpenOverlay: (Overlay) -> Unit, onClearData: () -> Unit) {
     val active = vm.activeTab
-    var editing by remember(active?.url, vm.activeIndex) { mutableStateOf(active?.url ?: "") }
+    var editing by remember(active?.url, vm.activeIndex) {
+        mutableStateOf(if (active?.isHome == true) "" else active?.url ?: "")
+    }
     var menuOpen by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
 
@@ -405,6 +415,11 @@ private fun GeckoHost(vm: BrowserViewModel, modifier: Modifier) {
             if (session != null && view.session !== session) {
                 view.releaseSession()
                 view.setSession(session)
+                // Required so the content actually receives input (clicks/typing)
+                // when hosted inside a Compose AndroidView.
+                session.setActive(true)
+                session.setFocused(true)
+                view.requestFocus()
             }
         }
     )
