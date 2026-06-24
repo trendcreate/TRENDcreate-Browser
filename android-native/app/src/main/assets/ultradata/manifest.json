@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "name": "TRENDcreate Ultra Low Data",
+  "version": "1.0",
+  "description": "超低速モード: 重いメディアに加え、サードパーティのスクリプトや埋め込みフレーム(広告・トラッカー・外部ウィジェット)を遮断します。サイト本体のJSは維持します。",
+  "applications": {
+    "gecko": {
+      "id": "ultradata@trendcreate.browser"
+    }
+  },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["block.js"]
+  }
+}
