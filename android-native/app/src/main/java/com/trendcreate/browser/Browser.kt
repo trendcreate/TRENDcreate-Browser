@@ -44,7 +44,7 @@ object Engine {
 /** A single browser tab backed by its own GeckoSession. */
 class Tab(
     val id: Long,
-    val session: GeckoSession,
+    var session: GeckoSession,
     initialUrl: String
 ) {
     var url by mutableStateOf(initialUrl)
@@ -231,13 +231,34 @@ class BrowserViewModel(app: Application) : AndroidViewModel(app) {
 
     fun closeTab(index: Int) {
         val tab = tabs.getOrNull(index) ?: return
+        // The last remaining tab is never removed; closing it returns to the
+        // home screen instead of leaving the app with no tab.
+        if (tabs.size == 1) {
+            resetToHome(tab)
+            return
+        }
         tab.session.close()
         tabs.removeAt(index)
-        if (tabs.isEmpty()) {
-            newTab(HOME_URL)
-        } else {
-            activeIndex = activeIndex.coerceIn(0, tabs.lastIndex)
-        }
+        activeIndex = activeIndex.coerceIn(0, tabs.lastIndex)
+    }
+
+    /** Replaces a tab's session with a fresh one and shows the home screen. */
+    private fun resetToHome(tab: Tab) {
+        tab.session.close()
+        val settings = GeckoSessionSettings.Builder()
+            .usePrivateMode(false)
+            .contextId("default")
+            .build()
+        val session = GeckoSession(settings)
+        session.open(runtime)
+        tab.session = session
+        tab.isHome = true
+        tab.url = ""
+        tab.title = "New Tab"
+        tab.canGoBack = false
+        tab.canGoForward = false
+        wireDelegates(tab)
+        activeIndex = tabs.indexOf(tab).coerceAtLeast(0)
     }
 
     fun selectTab(index: Int) { activeIndex = index.coerceIn(0, tabs.lastIndex) }

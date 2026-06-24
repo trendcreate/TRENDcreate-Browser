@@ -1,10 +1,12 @@
 package com.trendcreate.browser
 
-import android.media.MediaPlayer
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.OpenableColumns
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -170,31 +172,30 @@ private fun BasicSearchField(
 @Composable
 private fun AudioPlayerCard() {
     val context = LocalContext.current
-    var player by remember { mutableStateOf<MediaPlayer?>(null) }
-    var trackName by remember { mutableStateOf("トラック未読み込み") }
-    var isPlaying by remember { mutableStateOf(false) }
-    var volume by remember { mutableFloatStateOf(0.8f) }
+    var pendingPlay by remember { mutableStateOf(false) }
 
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        if (uri != null) {
-            player?.release()
-            isPlaying = false
-            try {
-                val mp = MediaPlayer()
-                mp.setDataSource(context, uri)
-                mp.setOnPreparedListener { it.setVolume(volume, volume) }
-                mp.setOnCompletionListener { isPlaying = false }
-                mp.prepareAsync()
-                player = mp
-                trackName = displayName(context, uri) ?: "音声ファイル"
-            } catch (e: Exception) {
-                trackName = "読み込みに失敗しました"
-            }
-        }
+    val notifPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        // Playback works regardless; without the permission only the
+        // notification is hidden. Proceed with the queued play action.
+        if (pendingPlay) { AudioController.playPause(context); pendingPlay = false }
     }
 
-    DisposableEffect(Unit) {
-        onDispose { player?.release() }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) AudioController.load(context, uri)
+    }
+
+    fun togglePlay() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            pendingPlay = true
+            notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            AudioController.playPause(context)
+        }
     }
 
     Surface(color = HCard, shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
@@ -210,38 +211,26 @@ private fun AudioPlayerCard() {
             Spacer(Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 FilledIconButton(
-                    onClick = {
-                        val mp = player ?: return@FilledIconButton
-                        if (isPlaying) { mp.pause(); isPlaying = false }
-                        else { mp.start(); isPlaying = true }
-                    },
+                    onClick = { togglePlay() },
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = HAccent)
                 ) {
                     Icon(
-                        if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        if (AudioController.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         "再生/一時停止", tint = Color(0xFF0B0C10)
                     )
                 }
                 Text(
-                    trackName, color = HMuted, fontSize = 13.sp,
+                    AudioController.trackName, color = HMuted, fontSize = 13.sp,
                     maxLines = 1,
                     modifier = Modifier.padding(horizontal = 12.dp).weight(1f)
                 )
             }
             Spacer(Modifier.height(8.dp))
             Slider(
-                value = volume,
-                onValueChange = { volume = it; player?.setVolume(it, it) },
+                value = AudioController.volume,
+                onValueChange = { AudioController.changeVolume(it) },
                 colors = SliderDefaults.colors(thumbColor = HAccent, activeTrackColor = HAccent)
             )
         }
     }
-}
-
-private fun displayName(context: android.content.Context, uri: Uri): String? {
-    return try {
-        context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
-            if (it.moveToFirst()) it.getString(0) else null
-        }
-    } catch (e: Exception) { null }
 }
