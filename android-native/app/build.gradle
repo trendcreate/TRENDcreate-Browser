@@ -18,8 +18,8 @@ android {
         applicationId "com.trendcreate.browser"
         minSdk 26
         targetSdk 36
-        versionCode 26062401
-        versionName "Android-26.6.24.01"
+        versionCode 26062402
+        versionName "Android-26.6.24.02"
     }
 
     signingConfigs {
