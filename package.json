@@ -23,7 +23,7 @@
     "@capacitor/core": "^8.3.4",
     "dompurify": "^3.4.6",
     "monaco-editor": "^0.55.1",
-    "pdfjs-dist": "^5.7.284"
+    "pdfjs-dist": "^6.2.108"
   },
   "build": {
     "electronDownload": {
